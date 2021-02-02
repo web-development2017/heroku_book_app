@@ -1,3 +1,4 @@
+import 'materialize-css/dist/css/materialize.min.css';
 import About from './About';
 import Home from './Home';
 
