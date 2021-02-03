@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 function Home(){
+    const apiKey = process.env.REACT_APP_API_KEY;
+    console.log(apiKey)
     return (
         <>            
             <header className="Navbar">
