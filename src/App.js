@@ -1,96 +1,58 @@
-import 'materialize-css/dist/css/materialize.min.css';
+import "materialize-css/dist/css/materialize.min.css";
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect
+} from "react-router-dom";
 
-import Navbar from './components/Navbar';
-import About from './components/About';
-import Home from './components/Home';
+import { useGoogleAuthFn } from "./Auth/useGoogleAuthFn";
+import { sidenavFn } from './Navbar/BtnFns';
+import { Navbar } from './Navbar/Navbar';
 
+import {MemoizedHome} from './Pages/Home';
+import { MemoizedAbout } from "./Pages/About";
 
-import GoogleAuthFn from './components/GoogleAuthFn';
-import { UserLoggedInContext } from './contexts/loggedInState';
-
-import React, {useEffect, useState} from 'react';
-
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-
+import User from './Pages/User'
 
 function App() {
-  const [authstate, setAuthState] = useState(false);
-  const [signingIn, setSigningIn] = useState(false);
-  const [authorizedScopeState, setauthorizedScopeState] = useState(false);
+  const { startupfinished, auth, signInBtnFn, signOutBtnFn, show_signing_in_out_screen, loggedInOutMsg} = useGoogleAuthFn();
 
-  let x = function (){
-
-      let props = {
-        isAuth: setAuthState,
-        setAuthScopeState: setauthorizedScopeState
-      }
-      GoogleAuthFn(props);
-  }
-
-  useEffect(() =>{
-    console.log('Loading')
-    window.gapi.load('client:auth2', x);
-    
-  }, []);
-
-  useEffect(() =>{
-    console.log('Authorized : ' + authstate)
-    if(authstate === true){
-      setSigningIn(false)
-    }
-  }, [authstate]);
-  
-  useEffect(() =>{
-    console.log("signingIn changed to: " + signingIn)
-  }, [signingIn]);
-
-  useEffect(() =>{
-    console.log("authorizedScopeState changed to: " + authorizedScopeState)
-  }, [authorizedScopeState]);
-
-  function signInBtnFn(){
-    setSigningIn(true)
-    let props = {
-      isAuth: setAuthState,
-      setSigningIn: setSigningIn,
-      setAuthScopeState: setauthorizedScopeState,
-      initSignIn: "initSignIn"
-    }
-
-    GoogleAuthFn(props);
-    console.log("Sign In Clicked");
-  }
-  function signOutBtnFn(){
-    let props = {
-      isAuth: setAuthState,
-      setSigningIn: setSigningIn,
-      setAuthScopeState: setauthorizedScopeState,
-      initSignOut: "initSignOut"
-    }
-    GoogleAuthFn(props);
-    console.log("Sign Out Clicked");
-  }
-  return signingIn ? (
-    <h1>Signing In</h1>
-    
-  ) :
+  return startupfinished ? 
   (
-    <>
-      <UserLoggedInContext.Provider value={authstate}>
-        <Router>
-          {authstate ? <Navbar onSignOutBtnClick={signOutBtnFn}/> : <Navbar onSignInBtnClick={signInBtnFn}/>}
-          <Switch>
-            <Route exact path="/">
-                <Home />
-            </Route>
-            <Route path="/about">
-              <About />
-            </Route>
-          </Switch>
-        </Router>
-      </UserLoggedInContext.Provider>  
-    </>
+    show_signing_in_out_screen ? <div className="container"><p>Signing {loggedInOutMsg}...</p></div> :
+      
+    <Router>
+      <Navbar auth={auth} onSidenavClick={sidenavFn} onSignInBtnClick={signInBtnFn} onSignOutBtnClick={signOutBtnFn}/>
+      
+      <Switch>
+
+        {/* Home */}
+        <Route exact path="/">
+          { auth ? <Redirect to="/user" /> : <MemoizedHome /> }
+        </Route>
+
+        {/* Authorised User Only */}
+        <Route exact path="/user">
+          { auth ? <User /> : <Redirect to="/" /> }
+        </Route>
+        
+        {/* About */}
+        <Route exact path="/about">
+          <MemoizedAbout />
+        </Route>
+
+      </Switch>
+    </Router>
+  
+  ):
+  (
+    <div className="container">
+      <p data-testid="hasStartUpFinished">Loading...</p>
+    </div>
+    
   )
+
 }
 
 export default App;
