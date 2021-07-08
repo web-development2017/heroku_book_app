@@ -29,7 +29,7 @@ function App() {
 
         {/* Home */}
         <Route exact path="/">
-          { auth ? <Redirect to="/user" /> : <MemoizedHome /> }
+          { auth ? <Redirect to="/user" /> : <MemoizedHome onSignInBtnClick={signInBtnFn}/> }
         </Route>
 
         {/* Authorised User Only */}
