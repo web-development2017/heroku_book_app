@@ -31,9 +31,9 @@ export const Navbar = ({ auth, onSidenavClick, onSignInBtnClick, onSignOutBtnCli
                 <li>
                 {
                     auth ? 
-                    <button className="sidenav-close" id="signOutLinkSidenav" >Sign Out</button> 
+                    <button className="sidenav-close" id="signOutLinkSidenav" onClick={onSignOutBtnClick}>Sign Out</button> 
                     :
-                    <button data-testid="signInSidenav" className="sidenav-close" id="signInLinkSideNav">Sign In</button>
+                    <button data-testid="signInSidenav" className="sidenav-close" id="signInLinkSideNav" onClick={onSignInBtnClick}>Sign In</button>
                 }
                 </li>
                 <li><a data-testid="sideNavAbout">About</a></li>
