@@ -2,15 +2,18 @@ import { useEffect, useState } from "react";
 const sortData = ({ value, all_books_read_data, setAllBooksReadData, isLoading, setABRvolId }) =>{
     
     if(value.totalItems > 0){
-        let fake_response = value.items;
+        let abr_data = value.items;
 
         console.log("put data in array");
         let books_array = [];
 
         setAllBooksReadData(books_array);
 
-        
-        fake_response.forEach(book => {
+        //the resonse from Google Books needs to be sorted because
+        //there is two different ISBN numbers and they are not
+        //always returned in the same order - isbn_13 could be the first index 
+        //or second index of the "industryIdentifiers" array.
+        abr_data.forEach(book => {
             let obj0 = {
                 isbn_13: book.volumeInfo.industryIdentifiers[0].identifier,
                 title: book.volumeInfo.title,
@@ -36,20 +39,16 @@ const sortData = ({ value, all_books_read_data, setAllBooksReadData, isLoading, 
         });
         isLoading(false);
                 
-        setABRvolId(fake_response.map(book =>book.id));
+        setABRvolId(abr_data.map(book =>book.id));
     }else{
-        
-        
-        // Object.entries(value).length
-        //No books
-        console.log(value)//{kind: "books#volumes", totalItems: 0}
-        setAllBooksReadData(value);
-        isLoading(false);
-        
-        
-       
+
+      //No books
+      console.log(value)//{kind: "books#volumes", totalItems: 0}
+      setAllBooksReadData(value);
+      isLoading(false);
     }
 }
+
 const fetch_abr_data = ({ all_books_read_data, setAllBooksReadData, controller, isLoading, setABRvolId })=>{
     
     const fetchData = new Promise(function(resolve, reject){
@@ -73,8 +72,8 @@ const fetch_abr_data = ({ all_books_read_data, setAllBooksReadData, controller, 
 
     fetchData.then((value)=>{
         // console.log(value.items);
-        // let response = value.items;
-        // setAllBooksReadData(response);
+        // let abr_data = value.items;
+        // setAllBooksReadData(abr_data);
         // isLoading(false);
         sortData({ value, all_books_read_data, setAllBooksReadData, isLoading, setABRvolId });  
     }).catch((error)=>{
@@ -95,10 +94,11 @@ export default function User({ all_books_read_data, setAllBooksReadData, isLoadi
            * covers initial state and abort controller
            */
           console.log("nothing in all_books_read_data");
-          
+
           isLoading(true);
           fetch_abr_data({ all_books_read_data, setAllBooksReadData, controller, isLoading, setABRvolId });
     
+          //totalItems = total number of books.
         }else if(all_books_read_data.totalItems === 0){
           /**
            * should cover no books state
@@ -113,7 +113,20 @@ export default function User({ all_books_read_data, setAllBooksReadData, isLoadi
           console.log("this message should never display. Error in User.js file - in useEffect if else branching");
         }
     
-        return () =>{      
+        return () =>{
+          //Cause promise to reject with an empty array on UNMOUNT
+          //Test:
+          //1. Refresh browser 
+          //2. F12 in browser
+          //3. Network tab set to SLOW 3G
+          //4. Click console tab
+          //5. Sign In
+          //6. Click About on Navbar.
+          //7. Click Home
+          //8. Loading... is displayed while data is being fetched as it was previously aborted on UNMOUNT
+          //Although, in the Network tab the data has still been fetched and returned 
+          //but at least the Promised was rejected.
+          
           controller.abort();    
         }
     }, []);
