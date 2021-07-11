@@ -72,11 +72,12 @@ const fetch_abr_data = ({ all_books_read_data, setAllBooksReadData, controller, 
     });
 
     fetchData.then((value)=>{
-        // console.log(value.items);
-        // let abr_data = value.items;
-        // setAllBooksReadData(abr_data);
-        // isLoading(false);
-        sortData({ value, all_books_read_data, setAllBooksReadData, isLoading, setABRvolId });  
+        if(value.totalItems > 0){
+          sortData({ value, all_books_read_data, setAllBooksReadData, isLoading, setABRvolId }); 
+        }else{
+          setAllBooksReadData(value);
+        }
+        
     }).catch((error)=>{
         console.log(error)//error shows an empty array when controller abort called
     });

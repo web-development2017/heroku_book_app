@@ -38,7 +38,7 @@ export default function Display_ABR_Content({ all_books_read_data, onCollapsible
                     <Link title="add books"id="addBookRead" to="/addBook" ><i className="material-icons">add</i></Link>                                
                 </div>
                 <div className="collapsible-body">
-                    {/* <ul> */}
+                    
                         {all_books_read_data.map(book => 
                         <Books
                         image={book.imageLinks}
@@ -50,7 +50,7 @@ export default function Display_ABR_Content({ all_books_read_data, onCollapsible
                         id={book.id}
                         key={book.id} 
                         />)}
-                    {/* </ul> */}
+                    
                 </div>                    
             </li>
         </ul>
