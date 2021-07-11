@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Display_ABR_Content from "./Display_ABR_Content";
 const sortData = ({ value, all_books_read_data, setAllBooksReadData, isLoading, setABRvolId }) =>{
     
     if(value.totalItems > 0){
@@ -82,7 +83,7 @@ const fetch_abr_data = ({ all_books_read_data, setAllBooksReadData, controller, 
 
 }
 
-export default function User({ all_books_read_data, setAllBooksReadData, isLoading, loading, setABRvolId }){
+export default function User({ all_books_read_data, setAllBooksReadData, isLoading, loading, setABRvolId, onCollapsibleClick }){
     console.log("User rendered");
     
     var controller = new AbortController();
@@ -134,15 +135,23 @@ export default function User({ all_books_read_data, setAllBooksReadData, isLoadi
     return loading ? (
     
         <div className="container">
-          <h1>User</h1>
+          <h1>Welcome</h1>
           <p>Loading...</p>
         </div>
     
       ) :
       (
         <div className="container">
-          <h1>User</h1>
-          {all_books_read_data.totalItems === 0 ? <p>no books</p> : <ul>{all_books_read_data.map(books => <li key={books.id}>{books.title}</li>)}</ul>}
+          <h1>Welcome</h1>
+          {/* {all_books_read_data.totalItems === 0 ? <p>no books</p> : <ul>{all_books_read_data.map(books => <li key={books.id}>{books.title}</li>)}</ul>} */}
+          {
+            all_books_read_data.totalItems === 0 ? 
+              <p>no books</p> : 
+              <Display_ABR_Content 
+                all_books_read_data={all_books_read_data}
+                onCollapsibleClick={onCollapsibleClick}
+              />
+          }
           
         </div>
         

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "materialize-css/dist/css/materialize.min.css";
+import M from  'materialize-css/dist/js/materialize.min.js';
 import {
   BrowserRouter as Router,
   Route,
@@ -15,6 +16,7 @@ import {MemoizedHome} from './Pages/Home';
 import { MemoizedAbout } from "./Pages/About";
 
 import User from './Pages/User/User'
+import AddBook from "./Pages/User/AddBook";
 
 function App() {
   //**auth** is set TRUE or FALSE in Auth/useGoogleAuthFn->AuthCheck
@@ -41,6 +43,14 @@ function App() {
   const [abr_already_in_collection_volumeid, setABRvolId] = useState([]);
   const [loading, isLoading] = useState(true);
 
+  //Passed through to User.js
+  function collapsibleFn(){
+    console.log("Collapsible clicked")
+    
+    var collapsible = document.querySelectorAll('.collapsible');
+    M.Collapsible.init(collapsible);
+  }
+
   return startupfinished ? 
   (
     show_signing_in_out_screen ? <div className="container"><p>Signing {loggedInOutMsg}...</p></div> :
@@ -65,9 +75,20 @@ function App() {
                 loading = { loading }
                 isLoading = { isLoading }
                 setABRvolId = { setABRvolId }
+                onCollapsibleClick={collapsibleFn}
               /> 
             : <Redirect to="/" /> 
           }
+        </Route>
+
+        {/* Add Book */}
+        <Route  path="/addBook">
+          {
+            auth ? 
+              <AddBook abr_already_in_collection_volumeid={abr_already_in_collection_volumeid} />
+            : <Redirect to="/" />
+          }
+
         </Route>
         
         {/* About */}
