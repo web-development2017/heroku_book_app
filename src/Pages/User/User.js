@@ -151,6 +151,10 @@ export default function User({ all_books_read_data, setAllBooksReadData, isLoadi
               <Display_ABR_Content 
                 all_books_read_data={all_books_read_data}
                 onCollapsibleClick={onCollapsibleClick}
+                controller={controller}
+                setAllBooksReadData={setAllBooksReadData}
+                setABRvolId={setABRvolId}
+
               />
           }
           

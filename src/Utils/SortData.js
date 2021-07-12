@@ -1,4 +1,4 @@
-export const sortData = ({ msg, value, setBookFoundData, setLoading }) => {
+export const sortData = ({ msg, value, setBookFoundData, setLoading, setAllBooksReadData, setABRvolId }) => {
     
     console.log(value);
     let dataToSort = value.items;
@@ -7,6 +7,7 @@ export const sortData = ({ msg, value, setBookFoundData, setLoading }) => {
     let books_array = [];
 
     msg === "getBookToAddToABR" ? setBookFoundData(books_array) :
+    msg === "reFetchABRData" ? setAllBooksReadData(books_array) :
     console.log(msg);
     // setAllBooksReadData(books_array);
 
@@ -40,6 +41,7 @@ export const sortData = ({ msg, value, setBookFoundData, setLoading }) => {
         book.volumeInfo.industryIdentifiers[1].type === "ISBN_13" ? books_array.push(obj1) :
         console.log("no ISBN_!3");
     });
-    setLoading(false);
-   
+    msg === "getBookToAddToABR" ? setLoading(false) :
+    msg === "reFetchABRData" ? setABRvolId(dataToSort.map(book =>book.id)) :
+    console.log(msg);   
 }

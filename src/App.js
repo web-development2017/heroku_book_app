@@ -43,10 +43,6 @@ function App() {
   const [abr_already_in_collection_volumeid, setABRvolId] = useState([]);
   const [loading, isLoading] = useState(true);
 
-  useEffect(()=>{
-    console.log(abr_already_in_collection_volumeid)
-  }, [abr_already_in_collection_volumeid])
-
   //Passed through to User.js
   function collapsibleFn(){
     console.log("Collapsible clicked")
@@ -89,7 +85,11 @@ function App() {
         <Route  path="/addBook">
           {
             auth ? 
-              <AddBook abr_already_in_collection_volumeid={abr_already_in_collection_volumeid} />
+              <AddBook 
+                abr_already_in_collection_volumeid={abr_already_in_collection_volumeid}
+                setAllBooksReadData = { setAllBooksReadData }
+                setABRvolId = { setABRvolId } 
+              />
             : <Redirect to="/" />
           }
 

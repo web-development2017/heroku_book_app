@@ -1,6 +1,49 @@
 import { useEffect, useState } from "react";
 import { sortData } from "../../Utils/SortData";
-export default function AddBook({ abr_already_in_collection_volumeid }){
+
+const fetch_abr_data = ({ controller, setAllBooksReadData, setABRvolId })=>{
+
+    const fetchData = new Promise(function(resolve, reject){
+        controller.signal.addEventListener('abort', () => {
+            reject([])
+        });
+        const request = window.gapi.client.request({
+            'method': 'GET',
+            'path': 'books/v1/mylibrary/bookshelves/4/volumes?fields=totalItems, items(id, volumeInfo/title, volumeInfo/authors, volumeInfo/publishedDate, volumeInfo/industryIdentifiers, volumeInfo/imageLinks)'
+        });
+
+        // // Execute the API request.
+        request.execute( function(response) {
+            // const obj = response.result;
+            resolve(response);
+            
+            reject("Error");          
+    
+        });   
+    });
+
+    fetchData.then((value)=>{
+        // console.log(value);
+        if(value.totalItems > 0){
+            let props = {
+                msg: "reFetchABRData",
+                value: value,
+                setAllBooksReadData: setAllBooksReadData,
+                setABRvolId: setABRvolId
+
+            }
+            // sortData(props);
+            sortData(props)
+        }else{sortData(value);}
+        
+        
+    }).catch((error)=>{
+        console.log(error)//error shows an empty array when controller abort called
+    });
+
+}
+
+export default function AddBook({ abr_already_in_collection_volumeid, setAllBooksReadData, setABRvolId }){
     /* ################################
     Used in DisplayBook.js
     STATES:
@@ -13,40 +56,27 @@ export default function AddBook({ abr_already_in_collection_volumeid }){
     const [loading, setLoading] = useState(false);
     const [bookfounddata, setBookFoundData] = useState([]);
     const [book_already_in_collection, setBookAlreadyInCollection] = useState(false);
-    const [nomessage, setNoMessage] = useState(true);
-
-    useEffect(() =>{
-        console.log(book_already_in_collection)
-
-    },[book_already_in_collection])
-
-    useEffect(()=>{
-        if(bookfounddata.length > 0){
-            console.log(bookfounddata[0].isbn_13);
-            console.log(bookfounddata[0].totalItems);
-        }else{
-            console.log(bookfounddata)
-        }
-        
-    },[bookfounddata])
+    const [book_added, setBookAdded] = useState(false);
 
     let isbn;
     var controller = new AbortController();
     var signal = controller.signal;
-    
+
+    //#region GET BOOK DETAILS
     function HandleISBNSubmit(e){
         e.preventDefault();
         isbn = '';
-        isbn = document.getElementById("ISBN").value;
+        isbn = document.getElementById("ISBN").value.trim();
+        let stripped_isbn = isbn.replaceAll(' ','');
         setLoading(true);
         setBookAlreadyInCollection(false);
+        setBookAdded(false);
 
+        //CHECK IF BOOK IS ALREADY IN COLLECTION
         function isInCollection(value){
-            console.log("here")
             let foundBookId = value.items[0].id;
             const already_in_collection_match = abr_already_in_collection_volumeid.find(element => element === foundBookId);
             if(already_in_collection_match){
-                console.log(already_in_collection_match);
                 setLoading(false);
                 setBookAlreadyInCollection(true);
                
@@ -64,7 +94,7 @@ export default function AddBook({ abr_already_in_collection_volumeid }){
 
         // Function to do an Ajax call
         const getData = async () => {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}&fields=totalItems,items(id,volumeInfo(title,authors,publisher,publishedDate,imageLinks/thumbnail,industryIdentifiers/type,industryIdentifiers/identifier))`, {signal}); // Generate the Response object
+        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${stripped_isbn}&fields=totalItems,items(id,volumeInfo(title,authors,publisher,publishedDate,imageLinks/thumbnail,industryIdentifiers/type,industryIdentifiers/identifier))`, {signal}); // Generate the Response object
             if (response.ok) {
                 const jsonValue = await response.json(); // Get JSON value from the response body
                 return Promise.resolve(jsonValue);
@@ -75,26 +105,53 @@ export default function AddBook({ abr_already_in_collection_volumeid }){
     
         // Call the function and output value or error message to console
         getData().then((value) =>{
-            // console.log(value)
             if(value.totalItems > 0){
-                // let props = {
-                //     msg: "getBookToAddToABR",
-                //     value: value,
-                //     setBookFoundData: setBookFoundData,
-                //     setLoading: setLoading
-                // }
-                // sortData(props)
                 isInCollection(value);
             }else{
                 console.log('google books couldn\'t find the book with that isbn');
                 setBookFoundData(value);
                 setLoading(false);
-            }
-            
+            }   
         }).catch((error) => {
             console.log(error)
+        });   
+    }
+    //#endregion GET BOOK DETAILS
+
+    function selectedBookToAdd(volumeid){
+        const addselectedbookPromise = new Promise(function(resolve, reject){
+            controller.signal.addEventListener('abort', () => {
+                reject([])
+            });
+            const request = window.gapi.client.request({
+                'method': 'POST',
+                'path': `books/v1/mylibrary/bookshelves/4/addVolume?volumeId=${volumeid}`,
+            });
+            // // Execute the API request.
+            request.execute( function(response) {
+                const obj = response;
+                resolve(obj);
+                reject("Error");
+            });
         });
-         
+        
+        addselectedbookPromise.then(
+            function(result){
+                console.log(result);
+                setBookAdded(true);
+                //RE-FETCH ABR
+                let props = {
+                    controller: controller,
+                    setAllBooksReadData: setAllBooksReadData,
+                    setABRvolId: setABRvolId
+
+                }
+                fetch_abr_data(props)                 
+            },
+            function(error){
+                console.log(error)
+            }
+        );
     }
 
     function Books(props) {
@@ -114,9 +171,8 @@ export default function AddBook({ abr_already_in_collection_volumeid }){
                     </div>
                     <div className="card-action">
                         {/* Add this book */}
-                        {/* <button onClick={selectedBookToAdd}>Add this book</button> */}
-
-                        {/* {bookadded && <ADD_BOOK_MODAL onModalAgreeBtnClick={onModalAgreeBtnClick} title={props.title} setAllBooksReadData={setAllBooksReadData} setABRvolId={setABRvolId} />} */}
+                        <button onClick={() => {selectedBookToAdd(props.volumeId)}}>Add this book</button>
+                        <button onClick={() => {setBookFoundData([]);setBookAlreadyInCollection(false)}}>Cancel</button>
                     </div>
                 </div>
             </div>
@@ -147,6 +203,7 @@ export default function AddBook({ abr_already_in_collection_volumeid }){
                 <input
                     id="ISBN"
                     type="text"
+                    pattern="[0-9]+"
                     required
                 />
                 <button>Find Book To Add</button>
@@ -157,7 +214,10 @@ export default function AddBook({ abr_already_in_collection_volumeid }){
             loading ? 
                 <div className="container"><p>Loading...</p></div>
             :
-            bookfounddata.length === 0 &&  book_already_in_collection === false ?
+            book_added === true ?
+            <div className="container"><p>Book Added</p></div>
+            :
+            bookfounddata.length === 0 && book_already_in_collection === false ?
             <p></p>
             :
             book_already_in_collection === true ?
