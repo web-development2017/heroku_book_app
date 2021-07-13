@@ -2,46 +2,6 @@ import {Link} from 'react-router-dom';
 import '../../css/dply_abr_content.css';
 import { sortData } from '../../Utils/SortData';
 
-// export const sortData = ({ msg, value, setAllBooksReadData, setABRvolId }) => {
-    
-//     let dataToSort = value.items;
-
-//     console.log("put data in array");
-//     let books_array = [];
-
-//     msg === "reFetchABRData" ? setAllBooksReadData(books_array) :
-//     console.log(msg);
-
-//     dataToSort.forEach(book => {
-//         let obj0 = {
-//             totalItems: value.totalItems,
-//             isbn_13: book.volumeInfo.industryIdentifiers[0].identifier,
-//             title: book.volumeInfo.title,
-//             authors: book.volumeInfo.authors,
-//             published: book.volumeInfo.publishedDate,
-//             publisher: book.volumeInfo.publisher,
-//             imageLinks: book.volumeInfo.imageLinks.thumbnail,
-//             id: book.id
-//         }
-//         let obj1 = {
-//             totalItems: value.totalItems,
-//             isbn_13: book.volumeInfo.industryIdentifiers[1].identifier,
-//             title: book.volumeInfo.title,
-//             authors: book.volumeInfo.authors,
-//             published: book.volumeInfo.publishedDate,
-//             publisher: book.volumeInfo.publisher,
-//             imageLinks: book.volumeInfo.imageLinks.thumbnail,
-//             id: book.id
-
-//         }
-//         book.volumeInfo.industryIdentifiers[0].type === "ISBN_13" ? books_array.push(obj0) :
-//         book.volumeInfo.industryIdentifiers[1].type === "ISBN_13" ? books_array.push(obj1) :
-//         console.log("no ISBN_!3");
-//     });
-//     setABRvolId(dataToSort.map(book =>book.id));
-   
-// }
-
 const fetch_abr_data = ({ controller, setAllBooksReadData, setABRvolId })=>{
 
     const fetchData = new Promise(function(resolve, reject){
@@ -84,15 +44,12 @@ const fetch_abr_data = ({ controller, setAllBooksReadData, setABRvolId })=>{
 
 }
 
-
-
-
 export default function Display_ABR_Content({ all_books_read_data, onCollapsibleClick, controller, setAllBooksReadData, setABRvolId }){
     
 
     function Books(props) {
 
-        function foo(volumeid){
+        function deleteBookFn(volumeid){
 
             setAllBooksReadData([]);
 
@@ -122,14 +79,14 @@ export default function Display_ABR_Content({ all_books_read_data, onCollapsible
         }
         return <>
             <div className="foo">
-            <h5 className="header">{props.title} <a onClick={() => {foo(props.id)}} title="delete" className="addBookReadDelete right" to="/deleteBook" ><i className="material-icons red-text">delete</i></a> </h5>
+            <h5 className="header">{props.title} <a onClick={() => {deleteBookFn(props.id)}} title="delete" className="addBookReadDelete right" to="/deleteBook" ><i className="material-icons red-text">delete</i></a> </h5>
             </div>
             
-           
             <div className="card horizontal">
                 <div className="card-image">
                     <img alt="book cover" src={props.image} />
                 </div>
+
                 <div className="card-stacked">
                     <div className="card-content">
                         <ul>
@@ -145,28 +102,31 @@ export default function Display_ABR_Content({ all_books_read_data, onCollapsible
             </div>
         </>          
     }
+
     return (
         
         <ul className="collapsible col s12 m12 l6" id="collapsible" onClick={onCollapsibleClick}>
             <li className="active">
+
                 <div className="collapsible-header">
                     <i className="material-icons">book</i>
                     Books Read
                     <Link title="add books"id="addBookRead" to="/addBook" ><i className="material-icons">add</i></Link>                                
                 </div>
+
                 <div className="collapsible-body">
                     
-                        {all_books_read_data.map(book => 
-                        <Books
-                        image={book.imageLinks}
-                        title={book.title}
-                        authors={book.authors}
-                        published={book.published}
-                        publisher={book.publisher}
-                        isbn={book.isbn_13}
-                        id={book.id}
-                        key={book.id} 
-                        />)}
+                    {all_books_read_data.map(book => 
+                    <Books
+                    image={book.imageLinks}
+                    title={book.title}
+                    authors={book.authors}
+                    published={book.published}
+                    publisher={book.publisher}
+                    isbn={book.isbn_13}
+                    id={book.id}
+                    key={book.id} 
+                    />)}
                     
                 </div>                    
             </li>

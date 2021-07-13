@@ -41,7 +41,15 @@ function App() {
   //that are already in collection.
   const [all_books_read_data, setAllBooksReadData] = useState([]);
   const [abr_already_in_collection_volumeid, setABRvolId] = useState([]);
-  const [loading, isLoading] = useState(true);
+
+  useEffect(()=>{
+    console.log(abr_already_in_collection_volumeid)
+
+  },[abr_already_in_collection_volumeid])
+
+  //**loading, isLoading ** passed through to User.js
+  //**isLoading** AddBook to pass through when re-fetching data
+  const [loading, isLoading] = useState(null);
 
   //Passed through to User.js
   function collapsibleFn(){
@@ -88,7 +96,8 @@ function App() {
               <AddBook 
                 abr_already_in_collection_volumeid={abr_already_in_collection_volumeid}
                 setAllBooksReadData = { setAllBooksReadData }
-                setABRvolId = { setABRvolId } 
+                setABRvolId = { setABRvolId }
+                isLoading = { isLoading }
               />
             : <Redirect to="/" />
           }

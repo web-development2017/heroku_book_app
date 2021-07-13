@@ -1,6 +1,6 @@
-export const sortData = ({ msg, value, setBookFoundData, setLoading, setAllBooksReadData, setABRvolId }) => {
+export const sortData = ({ msg, value, setBookFoundData, isLoading, setLoading, setAllBooksReadData, setABRvolId }) => {
     
-    console.log(value);
+    // console.log(value);
     let dataToSort = value.items;
 
     console.log("put data in array");
@@ -8,6 +8,7 @@ export const sortData = ({ msg, value, setBookFoundData, setLoading, setAllBooks
 
     msg === "getBookToAddToABR" ? setBookFoundData(books_array) :
     msg === "reFetchABRData" ? setAllBooksReadData(books_array) :
+    msg ==="sort_ABR_Data_User" ? setAllBooksReadData(books_array) :
     console.log(msg);
     // setAllBooksReadData(books_array);
 
@@ -42,6 +43,10 @@ export const sortData = ({ msg, value, setBookFoundData, setLoading, setAllBooks
         console.log("no ISBN_!3");
     });
     msg === "getBookToAddToABR" ? setLoading(false) :
+    msg === "sort_ABR_Data_User" ? isLoading(false) :
+    console.log(msg); 
+
+    msg === "sort_ABR_Data_User" ? setABRvolId(dataToSort.map(book =>book.id)) :
     msg === "reFetchABRData" ? setABRvolId(dataToSort.map(book =>book.id)) :
     console.log(msg);   
 }

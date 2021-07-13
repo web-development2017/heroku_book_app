@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { fetchData, postData } from "../../Data/fetchData";
 import { sortData } from "../../Utils/SortData";
 
 const fetch_abr_data = ({ controller, setAllBooksReadData, setABRvolId })=>{
@@ -43,7 +44,7 @@ const fetch_abr_data = ({ controller, setAllBooksReadData, setABRvolId })=>{
 
 }
 
-export default function AddBook({ abr_already_in_collection_volumeid, setAllBooksReadData, setABRvolId }){
+export default function AddBook({ isLoading, abr_already_in_collection_volumeid, setAllBooksReadData, setABRvolId }){
     /* ################################
     Used in DisplayBook.js
     STATES:
@@ -86,7 +87,8 @@ export default function AddBook({ abr_already_in_collection_volumeid, setAllBook
                     msg: "getBookToAddToABR",
                     value: value,
                     setBookFoundData: setBookFoundData,
-                    setLoading: setLoading
+                    setLoading: setLoading,
+                    isLoading: isLoading
                 }
                 sortData(props)
             }
@@ -119,39 +121,49 @@ export default function AddBook({ abr_already_in_collection_volumeid, setAllBook
     //#endregion GET BOOK DETAILS
 
     function selectedBookToAdd(volumeid){
-        const addselectedbookPromise = new Promise(function(resolve, reject){
-            controller.signal.addEventListener('abort', () => {
-                reject([])
-            });
-            const request = window.gapi.client.request({
-                'method': 'POST',
-                'path': `books/v1/mylibrary/bookshelves/4/addVolume?volumeId=${volumeid}`,
-            });
-            // // Execute the API request.
-            request.execute( function(response) {
-                const obj = response;
-                resolve(obj);
-                reject("Error");
-            });
-        });
+        let props = {
+            msg: "to_add_to_ABR",
+            volumeid: volumeid,
+            setBookAdded: setBookAdded,
+            controller: controller,
+            setAllBooksReadData: setAllBooksReadData,
+            setABRvolId: setABRvolId,
+            isLoading: isLoading
+        }
+        postData(props);
+        // const addselectedbookPromise = new Promise(function(resolve, reject){
+        //     controller.signal.addEventListener('abort', () => {
+        //         reject([])
+        //     });
+        //     const request = window.gapi.client.request({
+        //         'method': 'POST',
+        //         'path': `books/v1/mylibrary/bookshelves/4/addVolume?volumeId=${volumeid}`,
+        //     });
+        //     // // Execute the API request.
+        //     request.execute( function(response) {
+        //         const obj = response;
+        //         resolve(obj);
+        //         reject("Error");
+        //     });
+        // });
         
-        addselectedbookPromise.then(
-            function(result){
-                console.log(result);
-                setBookAdded(true);
-                //RE-FETCH ABR
-                let props = {
-                    controller: controller,
-                    setAllBooksReadData: setAllBooksReadData,
-                    setABRvolId: setABRvolId
+        // addselectedbookPromise.then(
+        //     function(result){
+        //         console.log(result);
+        //         setBookAdded(true);
+        //         //RE-FETCH ABR
+        //         let props = {
+        //             controller: controller,
+        //             setAllBooksReadData: setAllBooksReadData,
+        //             setABRvolId: setABRvolId
 
-                }
-                fetch_abr_data(props)                 
-            },
-            function(error){
-                console.log(error)
-            }
-        );
+        //         }
+        //         fetch_abr_data(props)                 
+        //     },
+        //     function(error){
+        //         console.log(error)
+        //     }
+        // );
     }
 
     function Books(props) {
