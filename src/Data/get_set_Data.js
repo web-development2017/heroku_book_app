@@ -1,11 +1,8 @@
 import { sortData } from "../Utils/SortData";
-export const fetchData = ({ msg, setAllBooksReadData, controller, isLoading, setABRvolId })=>{
+export const getData = ({ msg, setAllBooksReadData, controller, setABRvolId })=>{
     let url;
-    // let method;
     msg === "userFetch" ? url = 'books/v1/mylibrary/bookshelves/4/volumes?fields=totalItems, items(id, volumeInfo/title, volumeInfo/authors, volumeInfo/publishedDate, volumeInfo/industryIdentifiers, volumeInfo/imageLinks)'
     :
-    // msg === "to_add_to_ABR" ? url = `books/v1/mylibrary/bookshelves/4/addVolume?volumeId=${volumeid}`
-    // :
     console.log(msg)
 
     const fetchUserData = new Promise(function(resolve, reject){
@@ -28,15 +25,14 @@ export const fetchData = ({ msg, setAllBooksReadData, controller, isLoading, set
     });
 
     fetchUserData.then((value)=>{
-        console.log(value);
+        // console.log(value);
         if(value.totalItems > 0){
-            // INITIAL REQUEST FOR DATA
+            // INITIAL REQUEST FOR DATA AND RE-FETCH
             if(msg === "userFetch"){
                 let props = {
                 msg: "sort_ABR_Data_User",
                 value: value,
                 setAllBooksReadData: setAllBooksReadData,
-                isLoading: isLoading,
                 setABRvolId: setABRvolId
                 }
                 sortData(props);
@@ -52,14 +48,33 @@ export const fetchData = ({ msg, setAllBooksReadData, controller, isLoading, set
     });
 
 }
-export const postData = ({msg, setBookAdded, volumeid, controller, isLoading, setAllBooksReadData, setABRvolId}) => { 
+export const postData = ({ msg, setBookAdded, volumeid, controller, abr_isLoading, setAllBooksReadData, setABRvolId}) => { 
+    let bookShelfID;
+    let action;
+
+    if(msg === "deleteBook_ABR_04"){
+        action = 'removeVolume?';
+        bookShelfID = '4';
+        // ################
+        abr_isLoading(true);
+        // ################
+    }
+    else if(msg === "to_add_to_ABR"){
+        action = 'addVolume?';
+        bookShelfID = '4';
+    }
+    else{
+        console.log(msg)
+    }
+
+
     const postPromise = new Promise(function(resolve, reject){
         controller.signal.addEventListener('abort', () => {
             reject([])
         });
         const request = window.gapi.client.request({
             'method': 'POST',
-            'path': `books/v1/mylibrary/bookshelves/4/addVolume?volumeId=${volumeid}`,
+            'path': `books/v1/mylibrary/bookshelves/${bookShelfID}/${action}volumeId=${volumeid}`,
         });
         // // Execute the API request.
         request.execute( function(response) {
@@ -72,17 +87,15 @@ export const postData = ({msg, setBookAdded, volumeid, controller, isLoading, se
     postPromise.then(
         function(result){
             console.log(result);
-            setBookAdded(true);
+            msg === "to_add_to_ABR" ? setBookAdded(true) : console.log(msg)
             //RE-FETCH ABR
             let props = {
                 msg: "userFetch",
                 controller: controller,
                 setAllBooksReadData: setAllBooksReadData,
-                setABRvolId: setABRvolId,
-                isLoading: isLoading
-
+                setABRvolId: setABRvolId
             }
-            fetchData(props);                
+            getData(props);                
         },
         function(error){
             console.log(error)

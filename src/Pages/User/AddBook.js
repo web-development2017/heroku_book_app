@@ -1,50 +1,9 @@
 import { useEffect, useState } from "react";
-import { fetchData, postData } from "../../Data/fetchData";
+import { useLocation } from "react-router-dom";
+import { postData } from "../../Data/get_set_Data";
 import { sortData } from "../../Utils/SortData";
 
-const fetch_abr_data = ({ controller, setAllBooksReadData, setABRvolId })=>{
-
-    const fetchData = new Promise(function(resolve, reject){
-        controller.signal.addEventListener('abort', () => {
-            reject([])
-        });
-        const request = window.gapi.client.request({
-            'method': 'GET',
-            'path': 'books/v1/mylibrary/bookshelves/4/volumes?fields=totalItems, items(id, volumeInfo/title, volumeInfo/authors, volumeInfo/publishedDate, volumeInfo/industryIdentifiers, volumeInfo/imageLinks)'
-        });
-
-        // // Execute the API request.
-        request.execute( function(response) {
-            // const obj = response.result;
-            resolve(response);
-            
-            reject("Error");          
-    
-        });   
-    });
-
-    fetchData.then((value)=>{
-        // console.log(value);
-        if(value.totalItems > 0){
-            let props = {
-                msg: "reFetchABRData",
-                value: value,
-                setAllBooksReadData: setAllBooksReadData,
-                setABRvolId: setABRvolId
-
-            }
-            // sortData(props);
-            sortData(props)
-        }else{sortData(value);}
-        
-        
-    }).catch((error)=>{
-        console.log(error)//error shows an empty array when controller abort called
-    });
-
-}
-
-export default function AddBook({ isLoading, abr_already_in_collection_volumeid, setAllBooksReadData, setABRvolId }){
+export default function AddBook({ abr_isLoading, abr_already_in_collection_volumeid, setAllBooksReadData, setABRvolId }){
     /* ################################
     Used in DisplayBook.js
     STATES:
@@ -54,7 +13,11 @@ export default function AddBook({ isLoading, abr_already_in_collection_volumeid,
     Book Not Found
     Loading
     ################################ */
-    const [loading, setLoading] = useState(false);
+
+    const location = useLocation();
+    console.log(location.state);
+    
+    const [add_abr_loading, add_abr_setLoading] = useState(false);
     const [bookfounddata, setBookFoundData] = useState([]);
     const [book_already_in_collection, setBookAlreadyInCollection] = useState(false);
     const [book_added, setBookAdded] = useState(false);
@@ -69,7 +32,7 @@ export default function AddBook({ isLoading, abr_already_in_collection_volumeid,
         isbn = '';
         isbn = document.getElementById("ISBN").value.trim();
         let stripped_isbn = isbn.replaceAll(' ','');
-        setLoading(true);
+        add_abr_setLoading(true);
         setBookAlreadyInCollection(false);
         setBookAdded(false);
 
@@ -78,7 +41,7 @@ export default function AddBook({ isLoading, abr_already_in_collection_volumeid,
             let foundBookId = value.items[0].id;
             const already_in_collection_match = abr_already_in_collection_volumeid.find(element => element === foundBookId);
             if(already_in_collection_match){
-                setLoading(false);
+                add_abr_setLoading(false);
                 setBookAlreadyInCollection(true);
                
             }else{
@@ -87,15 +50,14 @@ export default function AddBook({ isLoading, abr_already_in_collection_volumeid,
                     msg: "getBookToAddToABR",
                     value: value,
                     setBookFoundData: setBookFoundData,
-                    setLoading: setLoading,
-                    isLoading: isLoading
+                    add_abr_setLoading: add_abr_setLoading
                 }
                 sortData(props)
             }
         }
 
         // Function to do an Ajax call
-        const getData = async () => {
+        const fetchData = async () => {
         const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${stripped_isbn}&fields=totalItems,items(id,volumeInfo(title,authors,publisher,publishedDate,imageLinks/thumbnail,industryIdentifiers/type,industryIdentifiers/identifier))`, {signal}); // Generate the Response object
             if (response.ok) {
                 const jsonValue = await response.json(); // Get JSON value from the response body
@@ -106,13 +68,13 @@ export default function AddBook({ isLoading, abr_already_in_collection_volumeid,
         }
     
         // Call the function and output value or error message to console
-        getData().then((value) =>{
+        fetchData().then((value) =>{
             if(value.totalItems > 0){
                 isInCollection(value);
             }else{
                 console.log('google books couldn\'t find the book with that isbn');
                 setBookFoundData(value);
-                setLoading(false);
+                add_abr_setLoading(false);
             }   
         }).catch((error) => {
             console.log(error)
@@ -128,42 +90,9 @@ export default function AddBook({ isLoading, abr_already_in_collection_volumeid,
             controller: controller,
             setAllBooksReadData: setAllBooksReadData,
             setABRvolId: setABRvolId,
-            isLoading: isLoading
+            abr_isLoading: abr_isLoading
         }
         postData(props);
-        // const addselectedbookPromise = new Promise(function(resolve, reject){
-        //     controller.signal.addEventListener('abort', () => {
-        //         reject([])
-        //     });
-        //     const request = window.gapi.client.request({
-        //         'method': 'POST',
-        //         'path': `books/v1/mylibrary/bookshelves/4/addVolume?volumeId=${volumeid}`,
-        //     });
-        //     // // Execute the API request.
-        //     request.execute( function(response) {
-        //         const obj = response;
-        //         resolve(obj);
-        //         reject("Error");
-        //     });
-        // });
-        
-        // addselectedbookPromise.then(
-        //     function(result){
-        //         console.log(result);
-        //         setBookAdded(true);
-        //         //RE-FETCH ABR
-        //         let props = {
-        //             controller: controller,
-        //             setAllBooksReadData: setAllBooksReadData,
-        //             setABRvolId: setABRvolId
-
-        //         }
-        //         fetch_abr_data(props)                 
-        //     },
-        //     function(error){
-        //         console.log(error)
-        //     }
-        // );
     }
 
     function Books(props) {
@@ -184,7 +113,7 @@ export default function AddBook({ isLoading, abr_already_in_collection_volumeid,
                     <div className="card-action">
                         {/* Add this book */}
                         <button onClick={() => {selectedBookToAdd(props.volumeId)}}>Add this book</button>
-                        <button onClick={() => {setBookFoundData([]);setBookAlreadyInCollection(false)}}>Cancel</button>
+                        <button onClick={() => {setBookFoundData([]);setBookAlreadyInCollection(false);controller.abort();}}>Cancel</button>
                     </div>
                 </div>
             </div>
@@ -198,7 +127,7 @@ export default function AddBook({ isLoading, abr_already_in_collection_volumeid,
             // https://stackoverflow.com/questions/30233302/promise-is-it-possible-to-force-cancel-a-promise
             
             setBookFoundData([]);
-            setLoading(false);
+            add_abr_setLoading(false);
             
             controller.abort();
             
@@ -223,7 +152,7 @@ export default function AddBook({ isLoading, abr_already_in_collection_volumeid,
 
         </div>
         {
-            loading ? 
+            add_abr_loading ? 
                 <div className="container"><p>Loading...</p></div>
             :
             book_added === true ?

@@ -1,14 +1,14 @@
-export const sortData = ({ msg, value, setBookFoundData, isLoading, setLoading, setAllBooksReadData, setABRvolId }) => {
+export const sortData = ({ msg, value, setBookFoundData, add_abr_setLoading, setAllBooksReadData, setABRvolId }) => {
     
     // console.log(value);
     let dataToSort = value.items;
 
-    console.log("put data in array");
+    // console.log("put data in array");
     let books_array = [];
 
     msg === "getBookToAddToABR" ? setBookFoundData(books_array) :
     msg === "reFetchABRData" ? setAllBooksReadData(books_array) :
-    msg ==="sort_ABR_Data_User" ? setAllBooksReadData(books_array) :
+    msg === "sort_ABR_Data_User" ? setAllBooksReadData(books_array) :
     console.log(msg);
     // setAllBooksReadData(books_array);
 
@@ -42,8 +42,8 @@ export const sortData = ({ msg, value, setBookFoundData, isLoading, setLoading, 
         book.volumeInfo.industryIdentifiers[1].type === "ISBN_13" ? books_array.push(obj1) :
         console.log("no ISBN_!3");
     });
-    msg === "getBookToAddToABR" ? setLoading(false) :
-    msg === "sort_ABR_Data_User" ? isLoading(false) :
+    
+    msg === "getBookToAddToABR" ? add_abr_setLoading(false) :
     console.log(msg); 
 
     msg === "sort_ABR_Data_User" ? setABRvolId(dataToSort.map(book =>book.id)) :

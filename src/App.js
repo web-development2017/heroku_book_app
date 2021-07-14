@@ -28,32 +28,38 @@ function App() {
 
   //**signInBtnFn, signOutBtnFn** are defined in Auth/useGoogleAuthFn
   //passed through to Navbar.
-
-
   const { startupfinished, auth, signInBtnFn, signOutBtnFn, show_signing_in_out_screen, loggedInOutMsg} = useGoogleAuthFn();
 
-  //**setAllBooksReadData** passed through to User/User.js
+  //**setAllBooksReadData** -> User/User.js -> Data/getData -> Utils/sortData **WHERE IT IS SET**
   //set with the all books read data returned from Google Books.
-
-  //**setABRvolId** passed through to User/User.js
-  //set with the volume ID of books already in collection so
-  //when I eventually set up checking ISBN number it will be used tp make a check and stop books being added
-  //that are already in collection.
   const [all_books_read_data, setAllBooksReadData] = useState([]);
-  const [abr_already_in_collection_volumeid, setABRvolId] = useState([]);
+
+  //**setABRvolId** -> User/User.js -> Data/get_set_Data/getData+postData -> Utils/sortData **WHERE IT IS SET**
+  //set with the volume ID of books already in collection so used to make a check and stop books being added
+  //that are already in collection.
+  const [abr_already_in_collection_volumeid, setABRvolId] = useState([]);  
+
+  //**abr_loading, abr_isLoading ** -> User/User.js
+  //**abr_isLoading** -> User/User.js -> User/Display_ABR_Content -> Data/get_set_Data/postData
+  //**WHERE IT IS SET TRUE** when book deleted because the data for the User page is re-fetched.
+  const [arb_loading, abr_isLoading] = useState(true);
 
   useEffect(()=>{
-    console.log(abr_already_in_collection_volumeid)
+    console.log("loading ABR: " + arb_loading)
+  },[arb_loading]);
 
-  },[abr_already_in_collection_volumeid])
-
-  //**loading, isLoading ** passed through to User.js
-  //**isLoading** AddBook to pass through when re-fetching data
-  const [loading, isLoading] = useState(null);
+  useEffect(()=>{
+    if(all_books_read_data.length > 0){
+      abr_isLoading(false);
+    }else{
+      // isLoading(true)
+      console.log('should be 0: ' + all_books_read_data.length);
+    }
+  },[all_books_read_data]);
 
   //Passed through to User.js
   function collapsibleFn(){
-    console.log("Collapsible clicked")
+    // console.log("Collapsible clicked");
     
     var collapsible = document.querySelectorAll('.collapsible');
     M.Collapsible.init(collapsible);
@@ -80,8 +86,8 @@ function App() {
               <User 
                 all_books_read_data = { all_books_read_data }
                 setAllBooksReadData = { setAllBooksReadData }
-                loading = { loading }
-                isLoading = { isLoading }
+                arb_loading = { arb_loading }
+                abr_isLoading = { abr_isLoading }
                 setABRvolId = { setABRvolId }
                 onCollapsibleClick={collapsibleFn}
               /> 
@@ -97,7 +103,7 @@ function App() {
                 abr_already_in_collection_volumeid={abr_already_in_collection_volumeid}
                 setAllBooksReadData = { setAllBooksReadData }
                 setABRvolId = { setABRvolId }
-                isLoading = { isLoading }
+                abr_isLoading = { abr_isLoading }
               />
             : <Redirect to="/" />
           }

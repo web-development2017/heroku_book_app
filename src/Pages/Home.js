@@ -2,7 +2,7 @@ import React from "react";
 import '../css/home.css';
 
 export const Home = ({ onSignInBtnClick }) =>{
-    console.log("Home Rendered")
+    // console.log("Home Rendered")
     return (
     <div className="container">
         <h1>Home</h1>
