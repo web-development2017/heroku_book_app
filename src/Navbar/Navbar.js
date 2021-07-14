@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import "../css/navBarStyle.css";
 
 export const Navbar = ({ auth, onSidenavClick, onSignInBtnClick, onSignOutBtnClick }) =>{
-    console.log("Navbar rendered");
+    // console.log("Navbar rendered");
     return (
         <header className="Navbar container">
             <nav className="blue">
