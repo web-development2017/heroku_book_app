@@ -5,6 +5,8 @@ import { sortData } from "../../Utils/SortData";
 
 export default function AddBook({ abr_setLoading, abr_already_in_collection_volumeid, setAllBooksReadData, setABRvolId }){
     
+    console.log('%c render' , 'color: red');
+
     const location = useLocation();
     
     /* ################################
@@ -17,17 +19,38 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
     Loading
     ################################ */
 
-    
+    //**add_abr_setLoading** 
+    // set FALSE IF fetchData returns a value.totalItems <= 0
+    // set FALSE IF abr_toadd_data.length > 0
     const [add_abr_loading, add_abr_setLoading] = useState(false);
+
+    //**setBookFoundData** -> Utils/sortData **WHERE IT IS SET**
+    // SET with value returned from fetchData if value.totalItems <= 0
+    // set with EMPTY ARRAY when CANCEL BTN CLICKED + ON UNMOUNT
     const [abr_toadd_data, setBookFoundData] = useState([]);
+
+    // **setBookAlreadyInCollection** set FALE HandleISBNSubmit clicked
+    // set TRUE when already in collection
+    // set FALSE when CANCEL BTN CLICKED
     const [book_already_in_collection, setBookAlreadyInCollection] = useState(false);
+
+    // **setBookAdded** -> Data/get_set_Data/postData **WHERE IT IS SET TRUE**
     const [book_added, setBookAdded] = useState(false);
+
+    useEffect(()=>{
+        console.log(book_already_in_collection)
+    },[book_already_in_collection]);
 
     useEffect(()=>{
         if(abr_toadd_data.length > 0){
             add_abr_setLoading(false);
         }
     },[abr_toadd_data]);
+
+    useEffect(()=>{
+        console.log(book_added);
+    },[book_added]);
+
 
     let isbn;
     var controller = new AbortController();
@@ -47,6 +70,8 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
 
         //CHECK IF BOOK IS ALREADY IN COLLECTION
         function isInCollection(value){
+            // console.log(`%c ${value}`, 'color:red');
+
             let foundBookId = value.items[0].id;
             const already_in_collection_match = abr_already_in_collection_volumeid.find(element => element === foundBookId);
             if(already_in_collection_match){
@@ -56,6 +81,9 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
                 setBookAlreadyInCollection(true);
                
             }else{
+                // //#########################
+                // add_abr_setLoading(true);
+                // //#########################
                 console.log("not in collection")
                 let props = {
                     msg: "sortBookToAddToABR",
@@ -65,7 +93,7 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
                 sortData(props)
             }
         }
-
+        
         // Function to do an Ajax call
         const fetchData = async () => {
         const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${stripped_isbn}&fields=totalItems,items(id,volumeInfo(title,authors,publisher,publishedDate,imageLinks/thumbnail,industryIdentifiers/type,industryIdentifiers/identifier))`, {signal}); // Generate the Response object
@@ -95,6 +123,7 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
     //#endregion GET BOOK DETAILS
 
     function selectedBookToAdd(volumeid){
+        // console.log("%c clicked", "color:green")
         let props = {
             msg: "to_add_to_ABR",
             volumeid: volumeid,
@@ -112,7 +141,7 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
             <h5 className="header">{props.title}</h5>
             <div className="card horizontal">
                 <div className="card-image">
-                    <img src={props.image} />
+                    <img src={props.image} alt={props.title}/>
                 </div>
                 <div className="card-stacked">
                     <div className="card-content">
@@ -124,6 +153,7 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
                     </div>
                     <div className="card-action">
                         {/* Add this book */}
+                        {/* <button onClick={() => {selectedBookToAdd(props.volumeId)}}>Add this book</button> */}
                         <button onClick={() => {selectedBookToAdd(props.volumeId)}}>Add this book</button>
                         <button onClick={() => {setBookFoundData([]);setBookAlreadyInCollection(false);controller.abort();}}>Cancel</button>
                     </div>
@@ -145,6 +175,7 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
             add_abr_setLoading(false);
             //#########################
             
+            console.log("%c controller abort called", 'color: purple')
             controller.abort();
             
         }
@@ -160,13 +191,15 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
                 <input
                     id="ISBN"
                     type="text"
-                    pattern="[0-9]+"
+                    // pattern="[0-9]+"
                     required
                 />
                 <button>Find Book To Add</button>
             </form>
 
         </div>
+        
+            
         {
             add_abr_loading ? 
                 <div className="container"><p>Loading...</p></div>

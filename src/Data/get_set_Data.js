@@ -4,7 +4,7 @@ export const getData = ({ msg, setAllBooksReadData, controller, setABRvolId })=>
     msg === "userFetch" ? url = 'books/v1/mylibrary/bookshelves/4/volumes?fields=totalItems, items(id, volumeInfo/title, volumeInfo/authors, volumeInfo/publishedDate, volumeInfo/industryIdentifiers, volumeInfo/imageLinks)'
     :
     console.log(msg)
-
+    
     const fetchUserData = new Promise(function(resolve, reject){
         controller.signal.addEventListener('abort', () => {
             reject([])
@@ -48,7 +48,7 @@ export const getData = ({ msg, setAllBooksReadData, controller, setABRvolId })=>
     });
 
 }
-export const postData = ({ msg, setBookAdded, volumeid, controller, abr_setLoading, setAllBooksReadData, setABRvolId}) => { 
+export const postData = ({ msg, setBookAdded, volumeid, controller, abr_setLoading, setAllBooksReadData, setABRvolId }) => { 
     let bookShelfID;
     let action;
 
@@ -87,7 +87,11 @@ export const postData = ({ msg, setBookAdded, volumeid, controller, abr_setLoadi
     postPromise.then(
         function(result){
             console.log(result);
-            msg === "to_add_to_ABR" ? setBookAdded(true) : console.log(msg)
+            
+            if(msg === "to_add_to_ABR"){
+                setBookAdded(true);
+            }
+
             //RE-FETCH ABR
             let props = {
                 msg: "userFetch",

@@ -37,12 +37,14 @@ const AuthCheck = ({ msg, setAuth, setStartUpFinished, setSigningInOut }) =>{
             GoogleAuth.signOut(); 
             setSigningInOut(false);
         }
+        
 
         function handleAuth(){
             GoogleAuth.signIn().then(function (response){
+                
                 console.log(response);
                 if(response !== undefined){
-                    setSigningInOut(false); 
+                    setSigningInOut(false);
                 }   
             }, function(error){
                 if(error.error === 'popup_closed_by_user'){

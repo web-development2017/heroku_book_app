@@ -1,7 +1,8 @@
 import React from "react";
 
 export const About = () =>{
-  // console.log("About Rendered");
+  
+  console.log('%c render' , 'color: red');
 
   return (
     <div className="container">
