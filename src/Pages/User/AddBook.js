@@ -153,7 +153,9 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
                     </div>
                     <div className="card-action">
                         {/* Add this book */}
-                        {/* <button onClick={() => {selectedBookToAdd(props.volumeId)}}>Add this book</button> */}
+                        {/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                        AFTER CLICKING THE NAVBAR IS RENDERED FOR SOME REASON?????????????
+                        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */}
                         <button onClick={() => {selectedBookToAdd(props.volumeId)}}>Add this book</button>
                         <button onClick={() => {setBookFoundData([]);setBookAlreadyInCollection(false);controller.abort();}}>Cancel</button>
                     </div>
@@ -198,8 +200,10 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
             </form>
 
         </div>
-        
-            
+        {/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        SEEMS TO WORK BUT NEEDS A BETTER SOLUTION
+        ANY SOLUTIONS WOULD BE VERY MUCH APPRECIATED
+        !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  */}
         {
             add_abr_loading ? 
                 <div className="container"><p>Loading...</p></div>
