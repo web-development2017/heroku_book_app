@@ -48,7 +48,7 @@ export const getData = ({ msg, setAllBooksReadData, controller, setABRvolId })=>
     });
 
 }
-export const postData = ({ msg, setBookAdded, volumeid, controller, abr_isLoading, setAllBooksReadData, setABRvolId}) => { 
+export const postData = ({ msg, setBookAdded, volumeid, controller, abr_setLoading, setAllBooksReadData, setABRvolId}) => { 
     let bookShelfID;
     let action;
 
@@ -56,7 +56,7 @@ export const postData = ({ msg, setBookAdded, volumeid, controller, abr_isLoadin
         action = 'removeVolume?';
         bookShelfID = '4';
         // ################
-        abr_isLoading(true);
+        abr_setLoading(true);
         // ################
     }
     else if(msg === "to_add_to_ABR"){

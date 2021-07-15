@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { getData } from "../../Data/get_set_Data";
 import Display_ABR_Content from "./Display_ABR_Content";
 
-export default function User({ arb_loading, abr_isLoading, all_books_read_data, setAllBooksReadData, setABRvolId, onCollapsibleClick }){
+export default function User({ arb_loading, abr_setLoading, all_books_read_data, setAllBooksReadData, setABRvolId, onCollapsibleClick }){
     // console.log("User rendered");
 
     var controller = new AbortController();
@@ -13,7 +13,7 @@ export default function User({ arb_loading, abr_isLoading, all_books_read_data, 
           /**
            * covers initial state and abort controller
            */
-          console.log("nothing in all_books_read_data");
+          console.log("nothing in all_books_read_data so GET DATA...");
           
           let props = {
             msg: "userFetch",
@@ -73,7 +73,7 @@ export default function User({ arb_loading, abr_isLoading, all_books_read_data, 
                 all_books_read_data={all_books_read_data}
                 onCollapsibleClick={onCollapsibleClick}
                 controller={controller}
-                abr_isLoading={abr_isLoading}
+                abr_setLoading={abr_setLoading}
                 setAllBooksReadData={setAllBooksReadData}
                 setABRvolId={setABRvolId}
               />

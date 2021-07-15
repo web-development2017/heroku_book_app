@@ -3,7 +3,10 @@ import { useLocation } from "react-router-dom";
 import { postData } from "../../Data/get_set_Data";
 import { sortData } from "../../Utils/SortData";
 
-export default function AddBook({ abr_isLoading, abr_already_in_collection_volumeid, setAllBooksReadData, setABRvolId }){
+export default function AddBook({ abr_setLoading, abr_already_in_collection_volumeid, setAllBooksReadData, setABRvolId }){
+    
+    const location = useLocation();
+    
     /* ################################
     Used in DisplayBook.js
     STATES:
@@ -14,13 +17,17 @@ export default function AddBook({ abr_isLoading, abr_already_in_collection_volum
     Loading
     ################################ */
 
-    const location = useLocation();
-    console.log(location.state);
     
     const [add_abr_loading, add_abr_setLoading] = useState(false);
-    const [bookfounddata, setBookFoundData] = useState([]);
+    const [abr_toadd_data, setBookFoundData] = useState([]);
     const [book_already_in_collection, setBookAlreadyInCollection] = useState(false);
     const [book_added, setBookAdded] = useState(false);
+
+    useEffect(()=>{
+        if(abr_toadd_data.length > 0){
+            add_abr_setLoading(false);
+        }
+    },[abr_toadd_data]);
 
     let isbn;
     var controller = new AbortController();
@@ -32,7 +39,9 @@ export default function AddBook({ abr_isLoading, abr_already_in_collection_volum
         isbn = '';
         isbn = document.getElementById("ISBN").value.trim();
         let stripped_isbn = isbn.replaceAll(' ','');
+        //#########################
         add_abr_setLoading(true);
+        //#########################
         setBookAlreadyInCollection(false);
         setBookAdded(false);
 
@@ -41,16 +50,17 @@ export default function AddBook({ abr_isLoading, abr_already_in_collection_volum
             let foundBookId = value.items[0].id;
             const already_in_collection_match = abr_already_in_collection_volumeid.find(element => element === foundBookId);
             if(already_in_collection_match){
+                //#########################
                 add_abr_setLoading(false);
+                //#########################
                 setBookAlreadyInCollection(true);
                
             }else{
                 console.log("not in collection")
                 let props = {
-                    msg: "getBookToAddToABR",
+                    msg: "sortBookToAddToABR",
                     value: value,
-                    setBookFoundData: setBookFoundData,
-                    add_abr_setLoading: add_abr_setLoading
+                    setBookFoundData: setBookFoundData
                 }
                 sortData(props)
             }
@@ -74,7 +84,9 @@ export default function AddBook({ abr_isLoading, abr_already_in_collection_volum
             }else{
                 console.log('google books couldn\'t find the book with that isbn');
                 setBookFoundData(value);
+                //######################### 
                 add_abr_setLoading(false);
+                //#########################
             }   
         }).catch((error) => {
             console.log(error)
@@ -90,7 +102,7 @@ export default function AddBook({ abr_isLoading, abr_already_in_collection_volum
             controller: controller,
             setAllBooksReadData: setAllBooksReadData,
             setABRvolId: setABRvolId,
-            abr_isLoading: abr_isLoading
+            abr_setLoading: abr_setLoading
         }
         postData(props);
     }
@@ -119,15 +131,19 @@ export default function AddBook({ abr_isLoading, abr_already_in_collection_volum
             </div>
         </div> 
     }
-
+    
     useEffect(() =>{
+        
+        console.log(location.state);
 
         return () =>{            
             //ABORT FETCH
             // https://stackoverflow.com/questions/30233302/promise-is-it-possible-to-force-cancel-a-promise
             
             setBookFoundData([]);
+            //#########################
             add_abr_setLoading(false);
+            //#########################
             
             controller.abort();
             
@@ -158,15 +174,13 @@ export default function AddBook({ abr_isLoading, abr_already_in_collection_volum
             book_added === true ?
             <div className="container"><p>Book Added</p></div>
             :
-            bookfounddata.length === 0 && book_already_in_collection === false ?
+            abr_toadd_data.length === 0 && book_already_in_collection === false ?
             <p></p>
             :
             book_already_in_collection === true ?
             <div className="container"><p>Book Already In Collection</p></div>
             :
-            bookfounddata.length > 0 ?
-                
-            
+            abr_toadd_data.length === 1 ?
             <div className="container">            
                 <ul className="col s12 m12 l6">
                     <li className="active">
@@ -178,7 +192,7 @@ export default function AddBook({ abr_isLoading, abr_already_in_collection_volum
                         <div>
                             
                             <ul>
-                                {bookfounddata.map(book => 
+                                {abr_toadd_data.map(book => 
                                 <Books 
                                     image={ book.imageLinks }
                                     title={ book.title }

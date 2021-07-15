@@ -39,21 +39,14 @@ function App() {
   //that are already in collection.
   const [abr_already_in_collection_volumeid, setABRvolId] = useState([]);  
 
-  //**abr_loading, abr_isLoading ** -> User/User.js
-  //**abr_isLoading** -> User/User.js -> User/Display_ABR_Content -> Data/get_set_Data/postData
+  //**abr_loading, abr_setLoading ** -> User/User.js
+  //**abr_setLoading** -> User/User.js -> User/Display_ABR_Content -> Data/get_set_Data/postData
   //**WHERE IT IS SET TRUE** when book deleted because the data for the User page is re-fetched.
-  const [arb_loading, abr_isLoading] = useState(true);
-
-  useEffect(()=>{
-    console.log("loading ABR: " + arb_loading)
-  },[arb_loading]);
+  const [arb_loading, abr_setLoading] = useState(true);
 
   useEffect(()=>{
     if(all_books_read_data.length > 0){
-      abr_isLoading(false);
-    }else{
-      // isLoading(true)
-      console.log('should be 0: ' + all_books_read_data.length);
+      abr_setLoading(false);
     }
   },[all_books_read_data]);
 
@@ -87,7 +80,7 @@ function App() {
                 all_books_read_data = { all_books_read_data }
                 setAllBooksReadData = { setAllBooksReadData }
                 arb_loading = { arb_loading }
-                abr_isLoading = { abr_isLoading }
+                abr_setLoading = { abr_setLoading }
                 setABRvolId = { setABRvolId }
                 onCollapsibleClick={collapsibleFn}
               /> 
@@ -103,7 +96,7 @@ function App() {
                 abr_already_in_collection_volumeid={abr_already_in_collection_volumeid}
                 setAllBooksReadData = { setAllBooksReadData }
                 setABRvolId = { setABRvolId }
-                abr_isLoading = { abr_isLoading }
+                abr_setLoading = { abr_setLoading }
               />
             : <Redirect to="/" />
           }
