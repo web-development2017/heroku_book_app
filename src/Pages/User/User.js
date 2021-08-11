@@ -30,8 +30,10 @@ export default function User({ arb_loading, abr_setLoading, all_books_read_data,
       //totalItems = total number of books.
     }else if(all_books_read_data.totalItems === 0){
       /**
-       * should cover no books
-       */
+      * should cover no books
+      */
+      //  Display message "no books" when there are no books in the collection
+      arb_loading(false);
       console.log("no books");
 
     }else if(all_books_read_data.length > 0){
