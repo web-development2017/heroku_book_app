@@ -1,5 +1,5 @@
 import { sortData } from "../Utils/SortData";
-export const getData = ({ msg, setAllBooksReadData, controller, setABRvolId })=>{
+export const getData = ({ msg, setAllBooksReadData, controller, setABRvolId, abr_setLoading })=>{
     let url;
     msg === "userFetch" ? url = 'books/v1/mylibrary/bookshelves/4/volumes?fields=totalItems, items(id, volumeInfo/title, volumeInfo/authors, volumeInfo/publishedDate, volumeInfo/industryIdentifiers, volumeInfo/imageLinks)'
     :
@@ -41,6 +41,7 @@ export const getData = ({ msg, setAllBooksReadData, controller, setABRvolId })=>
             
           }else{
             setAllBooksReadData(value);
+            abr_setLoading(false);
           }
         
     }).catch((error)=>{

@@ -22,7 +22,8 @@ export default function User({ arb_loading, abr_setLoading, all_books_read_data,
         msg: "userFetch",
         controller: controller,
         setAllBooksReadData: setAllBooksReadData,
-        setABRvolId: setABRvolId
+        setABRvolId: setABRvolId,
+        abr_setLoading: abr_setLoading
 
       }
       getData(props);
@@ -33,7 +34,6 @@ export default function User({ arb_loading, abr_setLoading, all_books_read_data,
       * should cover no books
       */
       //  Display message "no books" when there are no books in the collection
-      arb_loading(false);
       console.log("no books");
 
     }else if(all_books_read_data.length > 0){
