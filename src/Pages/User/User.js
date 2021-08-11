@@ -1,85 +1,90 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { getData } from "../../Data/get_set_Data";
-import Display_ABR_Content from "./Display_ABR_Content";
+import DisplayAbrContent from "./Display_ABR_Content";
 
-export default function User({ arb_loading, abr_isLoading, all_books_read_data, setAllBooksReadData, setABRvolId, onCollapsibleClick }){
-    // console.log("User rendered");
+export default function User({ arb_loading, abr_setLoading, all_books_read_data, setAllBooksReadData, setABRvolId, onCollapsibleClick }){
 
-    var controller = new AbortController();
+  console.log('%c render' , 'color: red');
 
-    useEffect(() => {
-    
-        if(all_books_read_data.length === 0){
-          /**
-           * covers initial state and abort controller
-           */
-          console.log("nothing in all_books_read_data");
-          
-          let props = {
-            msg: "userFetch",
-            controller: controller,
-            setAllBooksReadData: setAllBooksReadData,
-            setABRvolId: setABRvolId
+  //controller -> Data/get_set_Data/getData
+  //controller -> User/Display_ABR_Content
+  var controller = new AbortController();
 
-          }
-          getData(props);
-    
-          //totalItems = total number of books.
-        }else if(all_books_read_data.totalItems === 0){
-          /**
-           * should cover no books
-           */
-          console.log("no books");
-    
-        }else if(all_books_read_data.length > 0){
-          console.log("already have data");
-        }
-        else{
-          console.log("this message should never display. Error in User.js file - in useEffect if else branching");
-        }
-    
-        return () =>{
-          //Cause promise to reject with an empty array on UNMOUNT
-          //Test:
-          //1. Refresh browser 
-          //2. F12 in browser
-          //3. Network tab set to SLOW 3G
-          //4. Click console tab
-          //5. Sign In
-          //6. Click About on Navbar.
-          //7. Click Home
-          //8. Loading... is displayed while data is being fetched as it was previously aborted on UNMOUNT
-          //Although, in the Network tab the data has still been fetched and returned 
-          //but at least the Promised was rejected.
-          
-          controller.abort();    
-        }
-    }, []);
+  useEffect(() => {
+  
+    if(all_books_read_data.length === 0){
+      /**
+       * covers initial state and abort controller
+       */
+      console.log("nothing in all_books_read_data so GET DATA...");
+      
+      let props = {
+        msg: "userFetch",
+        controller: controller,
+        setAllBooksReadData: setAllBooksReadData,
+        setABRvolId: setABRvolId
 
-    return arb_loading === true ? (
-    
-        <div className="container">
-          <h1>Welcome</h1>
-          <p>Loading...</p>
-        </div>
-    
-      ) :
-      (
-        <div className="container">
-          <h1>Welcome</h1>
-          {
-            all_books_read_data.totalItems === 0 ? <p>no books</p> 
-            : <Display_ABR_Content 
-                all_books_read_data={all_books_read_data}
-                onCollapsibleClick={onCollapsibleClick}
-                controller={controller}
-                abr_isLoading={abr_isLoading}
-                setAllBooksReadData={setAllBooksReadData}
-                setABRvolId={setABRvolId}
-              />
-          }
-          
-        </div>
-        
-      ) 
+      }
+      getData(props);
+
+      //totalItems = total number of books.
+    }else if(all_books_read_data.totalItems === 0){
+      /**
+      * should cover no books
+      */
+      //  Display message "no books" when there are no books in the collection
+      arb_loading(false);
+      console.log("no books");
+
+    }else if(all_books_read_data.length > 0){
+      console.log("already have data");
+    }
+    else{
+      console.log("this message should never display. Error in User.js file - in useEffect if else branching");
+    }
+
+    return () =>{
+      //Cause promise to reject with an empty array on UNMOUNT
+      //Test:
+      //1. Refresh browser 
+      //2. F12 in browser
+      //3. Network tab set to SLOW 3G
+      //4. Click console tab
+      //5. Sign In
+      //6. Click About on Navbar.
+      //7. Click Home
+      //8. Loading... is displayed while data is being fetched as it was previously aborted on UNMOUNT
+      //Although, in the Network tab the data has still been fetched and returned 
+      //but at least the Promised was rejected.
+      
+      controller.abort();    
+    }
+  }, []);
+
+  return arb_loading === true ? (
+  
+    <div className="container">
+      <h1>Welcome</h1>
+      <p>Loading...</p>
+    </div>
+
+  ) :
+  (
+    <div className="container">
+      <h1>Welcome</h1>
+      {
+        all_books_read_data.totalItems === 0 ? <p>no books</p> 
+        : <DisplayAbrContent 
+            all_books_read_data={all_books_read_data}
+            onCollapsibleClick={onCollapsibleClick}
+            controller={controller}
+            abr_setLoading={abr_setLoading}
+            setAllBooksReadData={setAllBooksReadData}
+            setABRvolId={setABRvolId}
+          />
+      }
+      
+    </div>    
+  )
+     
 }

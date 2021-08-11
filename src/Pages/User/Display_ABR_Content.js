@@ -2,8 +2,9 @@ import {Link} from 'react-router-dom';
 import '../../css/dply_abr_content.css';
 import { postData } from '../../Data/get_set_Data';
 
-export default function Display_ABR_Content({ abr_isLoading, all_books_read_data, onCollapsibleClick, controller, setAllBooksReadData, setABRvolId }){
+export default function DisplayAbrContent({ abr_setLoading, all_books_read_data, onCollapsibleClick, controller, setAllBooksReadData, setABRvolId }){
     
+    console.log('%c render' , 'color: red');
 
     function Books(props) {
 
@@ -16,7 +17,7 @@ export default function Display_ABR_Content({ abr_isLoading, all_books_read_data
                 controller: controller,
                 setAllBooksReadData: setAllBooksReadData,
                 setABRvolId: setABRvolId,
-                abr_isLoading: abr_isLoading
+                abr_setLoading: abr_setLoading
 
             }
             postData(props);
