@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Link } from 'react-router-dom';
 import { getData } from "../../Data/get_set_Data";
 import DisplayAbrContent from "./Display_ABR_Content";
 
@@ -73,7 +74,7 @@ export default function User({ arb_loading, abr_setLoading, all_books_read_data,
     <div className="container">
       <h1>Welcome</h1>
       {
-        all_books_read_data.totalItems === 0 ? <p>no books</p> 
+        all_books_read_data.totalItems === 0 ? <div><p>no books</p><Link title="add books" id="addBookRead" to="/addBook">Add Book</Link></div> 
         : <DisplayAbrContent 
             all_books_read_data={all_books_read_data}
             onCollapsibleClick={onCollapsibleClick}
