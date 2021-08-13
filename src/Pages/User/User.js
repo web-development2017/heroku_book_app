@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { getData } from "../../Data/get_set_Data";
 import DisplayAbrContent from "./Display_ABR_Content";
 
+import '../../css/home.css';
+
 export default function User({ arb_loading, abr_setLoading, all_books_read_data, setAllBooksReadData, setABRvolId, onCollapsibleClick }){
 
   console.log('%c render' , 'color: red');
@@ -72,9 +74,23 @@ export default function User({ arb_loading, abr_setLoading, all_books_read_data,
   ) :
   (
     <div className="container">
-      <h1>Welcome</h1>
+      <h1 className="paddingToMatchCard">Welcome</h1>
       {
-        all_books_read_data.totalItems === 0 ? <div><p>no books</p><Link title="add books" id="addBookRead" to="/addBook">Add Book</Link></div> 
+        all_books_read_data.totalItems === 0 ? 
+          // <div><p>no books</p><Link title="add books" id="addBookRead" to="/addBook">Add Book</Link></div> 
+          <div className="row">
+            <div className="col s12 m6">
+                <div className="card">
+                    <div className="card-content">
+                      <h4>No books in collection</h4>
+                      <p>To start adding books to your collection <Link title="add books" id="addBookRead" to="/addBook">Click Here</Link></p>
+                    </div>
+                    <div className="card-action">
+                      <Link title="add books" id="addBookRead" to="/addBook">Add Books</Link>
+                    </div>
+                </div>
+            </div>
+          </div>
         : <DisplayAbrContent 
             all_books_read_data={all_books_read_data}
             onCollapsibleClick={onCollapsibleClick}
