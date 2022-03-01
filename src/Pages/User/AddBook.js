@@ -26,7 +26,7 @@ function fetchDataFromISBN(stripped_isbn, callback, {signal}){
         
 }
 
-function findBookToAdd(e, {signal, collection, abr_already_in_collection_volumeid, setBookAlreadyInCollection, add_abr_setLoading, setBookFoundData}){
+function findBookToAdd(e, {signal, collection, abr_already_in_collection_volumeid, reading_now_data_already_in_collection_volumeid, setBookAlreadyInCollection, add_abr_setLoading, setBookFoundData}){
     e.preventDefault();
     let isbn;        
     isbn = '';
@@ -49,7 +49,7 @@ function findBookToAdd(e, {signal, collection, abr_already_in_collection_volumei
     function isInCollection(value){
         let foundBookId = value.items[0].id;
         let book_already_in_collection_volumeid;
-        collection === "Reading Now" ? console.log("foo")
+        collection === "Reading Now" ? book_already_in_collection_volumeid = reading_now_data_already_in_collection_volumeid
         :
         collection === "Have Read" ? book_already_in_collection_volumeid = abr_already_in_collection_volumeid
         :
@@ -90,7 +90,7 @@ function findBookToAdd(e, {signal, collection, abr_already_in_collection_volumei
        
 }
 
-export default function AddBook({ abr_setLoading, abr_already_in_collection_volumeid, setAllBooksReadData, setABRvolId }){
+export default function AddBook({ abr_setLoading, abr_already_in_collection_volumeid, reading_now_data_already_in_collection_volumeid, setAllBooksReadData, setABRvolId }){
     
     console.log('%c render' , 'color: red');
 
@@ -194,7 +194,7 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
         <div className="container">
             <h1>Add to {collection}</h1>
 
-            <form id="myForm" onSubmit={(e) => {findBookToAdd(e,{signal:signal, collection: collection, abr_already_in_collection_volumeid: abr_already_in_collection_volumeid, setBookAlreadyInCollection: setBookAlreadyInCollection, add_abr_setLoading: add_abr_setLoading, setBookFoundData: setBookFoundData})}}>
+            <form id="myForm" onSubmit={(e) => {findBookToAdd(e,{signal:signal, collection: collection, abr_already_in_collection_volumeid: abr_already_in_collection_volumeid, reading_now_data_already_in_collection_volumeid: reading_now_data_already_in_collection_volumeid, setBookAlreadyInCollection: setBookAlreadyInCollection, add_abr_setLoading: add_abr_setLoading, setBookFoundData: setBookFoundData})}}>
                 <label>ISBN</label>
                 <input
                     id="ISBN"

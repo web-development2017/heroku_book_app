@@ -108,6 +108,7 @@ function App() {
             auth ? 
               <AddBook 
                 abr_already_in_collection_volumeid={abr_already_in_collection_volumeid}
+                reading_now_data_already_in_collection_volumeid={reading_now_data_already_in_collection_volumeid}
                 setAllBooksReadData = { setAllBooksReadData }
                 setABRvolId = { setABRvolId }
                 abr_setLoading = { abr_setLoading }
