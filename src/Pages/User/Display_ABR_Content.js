@@ -56,7 +56,7 @@ export default function DisplayAbrContent({ abr_setLoading, all_books_read_data,
 
                 <div className="collapsible-header">
                     <i className="material-icons">book</i>
-                    {all_books_read_data[0]?.totalItems} Books Read
+                    {all_books_read_data[0]?.totalItems} Book{all_books_read_data[0]?.totalItems === 1 ? " " : "s"} Read
                     {/* state is passed through to AddBook.js in the useEffect hook
                     why? so can keep track of collection type ie have read, to read, reading now etc
                      */}

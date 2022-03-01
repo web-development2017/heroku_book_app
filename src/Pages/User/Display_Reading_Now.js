@@ -70,7 +70,7 @@ export default function Display_Reading_Now({ reading_now_data, setReadingNowDat
 
                 <div className="collapsible-header">
                     <i className="material-icons">book</i>
-                    {reading_now_data[0]?.totalItems} Books Reading Now
+                    {reading_now_data[0]?.totalItems} Book{reading_now_data[0]?.totalItems === 1 ? " " : "s"} Reading Now
                     <Link title="add books" id="addBookRead" to={{pathname: "/addBook", state:{collection: "Reading Now"}}}><i className="material-icons">add</i></Link>                                
                 </div>
 
