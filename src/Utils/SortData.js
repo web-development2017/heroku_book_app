@@ -1,15 +1,9 @@
-export const sortData = ({ msg, value, setBookFoundData, setAllBooksReadData, setABRvolId }) => {
+export const sortData = ({ value }) => {
+        
     
-    // console.log(value);
     let dataToSort = value.items;
-
     // console.log("put data in array");
     let books_array = [];
-
-    msg === "sortBookToAddToABR" ? setBookFoundData(books_array) :
-    msg === "reFetchABRData" ? setAllBooksReadData(books_array) :
-    msg === "sort_ABR_Data_User" ? setAllBooksReadData(books_array) :
-    console.log(msg);
 
     //the resonse from Google Books needs to be sorted because
     //there is two different ISBN numbers and they are not
@@ -40,9 +34,11 @@ export const sortData = ({ msg, value, setBookFoundData, setAllBooksReadData, se
         book.volumeInfo.industryIdentifiers[0].type === "ISBN_13" ? books_array.push(obj0) :
         book.volumeInfo.industryIdentifiers[1].type === "ISBN_13" ? books_array.push(obj1) :
         console.log("no ISBN_!3");
-    }); 
+    });
 
-    msg === "sort_ABR_Data_User" ? setABRvolId(dataToSort.map(book =>book.id)) :
-    msg === "reFetchABRData" ? setABRvolId(dataToSort.map(book =>book.id)) :
-    console.log(msg);   
+    return books_array;
+
+    // msg === "sort_ABR_Data_User" ? setABRvolId(dataToSort.map(book =>book.id)) :
+    // msg === "reFetchABRData" ? setABRvolId(dataToSort.map(book =>book.id)) :
+    // console.log(msg);   
 }

@@ -1,9 +1,14 @@
-import { sortData } from "../Utils/SortData";
-export const getData = ({ msg, setAllBooksReadData, controller, setABRvolId, abr_setLoading })=>{
-    let url;
-    msg === "userFetch" ? url = 'books/v1/mylibrary/bookshelves/4/volumes?fields=totalItems, items(id, volumeInfo/title, volumeInfo/authors, volumeInfo/publishedDate, volumeInfo/industryIdentifiers, volumeInfo/imageLinks)'
-    :
-    console.log(msg)
+// Favorites: 0
+// Purchased: 1
+// To Read: 2
+// Reading Now: 3
+// Have Read: 4
+// Reviewed: 5
+// Recently Viewed: 6
+// My eBooks: 7
+// Books For You: 8 If we have no recommendations for the user, this shelf does not exist.
+
+export const getData = async({ url, controller }, sorted_data_callback)=>{
     
     const fetchUserData = new Promise(function(resolve, reject){
         controller.signal.addEventListener('abort', () => {
@@ -25,29 +30,12 @@ export const getData = ({ msg, setAllBooksReadData, controller, setABRvolId, abr
     });
 
     fetchUserData.then((value)=>{
-        // console.log(value);
-        if(value.totalItems > 0){
-            // INITIAL REQUEST FOR DATA AND RE-FETCH
-            if(msg === "userFetch"){
-                let props = {
-                msg: "sort_ABR_Data_User",
-                value: value,
-                setAllBooksReadData: setAllBooksReadData,
-                setABRvolId: setABRvolId
-                }
-                sortData(props);
-            }
-            else{console.log(msg);}
-            
-          }else{
-            setAllBooksReadData(value);
-            abr_setLoading(false);
-          }
+        sorted_data_callback(value);       
         
     }).catch((error)=>{
         console.log(error)//error shows an empty array when controller abort called
     });
-
+    
 }
 export const postData = ({ msg, setBookAdded, volumeid, controller, abr_setLoading, setAllBooksReadData, setABRvolId }) => { 
     let bookShelfID;
@@ -59,6 +47,10 @@ export const postData = ({ msg, setBookAdded, volumeid, controller, abr_setLoadi
         // ################
         abr_setLoading(true);
         // ################
+    }
+    else if(msg === "deleteBook_ReadingNow_03"){
+        action = 'removeVolume?';
+        bookShelfID = '3'
     }
     else if(msg === "to_add_to_ABR"){
         action = 'addVolume?';

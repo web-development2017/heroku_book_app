@@ -4,62 +4,127 @@ import { getData } from "../../Data/get_set_Data";
 import DisplayAbrContent from "./Display_ABR_Content";
 
 import '../../css/home.css';
+import Display_Reading_Now from "./Display_Reading_Now";
+import { sortData } from "../../Utils/SortData";
 
-export default function User({ arb_loading, abr_setLoading, all_books_read_data, setAllBooksReadData, setABRvolId, onCollapsibleClick }){
+function books_read({ controller, setAllBooksReadData, setABRvolId }){
+  let url = 'books/v1/mylibrary/bookshelves/4/volumes?fields=totalItems, items(id, volumeInfo/title, volumeInfo/authors, volumeInfo/publishedDate, volumeInfo/publisher, volumeInfo/industryIdentifiers, volumeInfo/imageLinks)';
+  // #4 Store Volume Id
+  function store_volumeId({returned_sorted_data}){
+    setABRvolId(returned_sorted_data.map(book =>book.id))
+  }
+  // #3 Store Data
+  function store_sorted_data({returned_sorted_data}){
+    setAllBooksReadData(returned_sorted_data);
+  }
+  // #2 Sort Data
+  function sorted_data_callback(value){
+    if(value.totalItems === 0){
+      console.log("no books in collection")
+    }else{
+      console.log("books in All Books Read collection")
+      let returned_sorted_data = sortData({value: value})
+      store_sorted_data({returned_sorted_data: returned_sorted_data})
+      store_volumeId({returned_sorted_data: returned_sorted_data})
+
+    }
+  }
+  // #1 Get Data
+  getData({url: url, controller: controller}, sorted_data_callback);
+  
+}
+
+function reading_now({ controller, setReadingNowData, setRNDvolId }){
+  // getData({msg: "getReadingNow", controller: controller, setReadingNowData: setReadingNowData})
+
+  let url = 'books/v1/mylibrary/bookshelves/3/volumes?fields=totalItems, items(id, volumeInfo/title, volumeInfo/authors, volumeInfo/publishedDate, volumeInfo/publisher, volumeInfo/industryIdentifiers, volumeInfo/imageLinks)';
+
+  // #4 Store Volume Id
+  function store_volumeId({returned_sorted_data}){
+    setRNDvolId(returned_sorted_data.map(book =>book.id));
+    // returned_sorted_data.map(book => console.log(book.id))
+  }
+  // #3 Store Data
+  function store_sorted_data({returned_sorted_data}){
+    setReadingNowData(returned_sorted_data);
+  }
+  // #2 Sort Data
+  function sorted_data_callback(value){
+    if(value.totalItems === 0){
+      console.log("no books in Reading Now collection")
+    }else{
+      console.log("books in Reading Now collection");
+      let returned_sorted_data = sortData({value: value});
+      store_sorted_data({returned_sorted_data: returned_sorted_data});
+      store_volumeId({returned_sorted_data: returned_sorted_data});
+    }
+  }
+  // #1 Get Data
+  getData({url: url, controller: controller}, sorted_data_callback);
+}
+
+function initGetBooksData({ controller, all_books_read_data, reading_now_data, setAllBooksReadData, setReadingNowData, setABRvolId, setRNDvolId }){
+  let arrayofcollections = [all_books_read_data, reading_now_data]
+
+  arrayofcollections.forEach((array) => {
+
+    if (array.length === 0) {
+      // Nothing in array so need to get the data
+      arrayofcollections.indexOf(array) === 0 ?
+        // 0 is "books read" collection
+        books_read({ controller: controller, setAllBooksReadData: setAllBooksReadData, setABRvolId: setABRvolId })
+        
+      : 
+      arrayofcollections.indexOf(array) === 1 ? 
+    
+        reading_now({ controller: controller, setReadingNowData: setReadingNowData, setRNDvolId: setRNDvolId })
+      : 
+      console.log("Shouln't get a message here")
+
+    } 
+    else if (array[0]?.totalItems === 0) {
+      console.log("no books");
+    }
+    else if(array.length > 0){
+      console.log("Already have data");
+    }
+    else{console.log("This message should never display")}
+  });
+}
+
+export default function User(
+  { 
+    arb_loading,
+    abr_setLoading,
+    all_books_read_data,
+    setAllBooksReadData,
+    reading_now_data,
+    setReadingNowData,
+    setABRvolId,
+    setRNDvolId,
+    onCollapsibleClick 
+  }
+){
 
   console.log('%c render' , 'color: red');
 
-  //controller -> Data/get_set_Data/getData
-  //controller -> User/Display_ABR_Content
   var controller = new AbortController();
 
-  useEffect(() => {
   
-    if(all_books_read_data.length === 0){
-      /**
-       * covers initial state and abort controller
-       */
-      console.log("nothing in all_books_read_data so GET DATA...");
-      
-      let props = {
-        msg: "userFetch",
-        controller: controller,
-        setAllBooksReadData: setAllBooksReadData,
-        setABRvolId: setABRvolId,
-        abr_setLoading: abr_setLoading
 
-      }
-      getData(props);
-
-      //totalItems = total number of books.
-    }else if(all_books_read_data.totalItems === 0){
-      /**
-      * should cover no books
-      */
-      //  Display message "no books" when there are no books in the collection
-      console.log("no books");
-
-    }else if(all_books_read_data.length > 0){
-      console.log("already have data");
-    }
-    else{
-      console.log("this message should never display. Error in User.js file - in useEffect if else branching");
-    }
-
-    return () =>{
-      //Cause promise to reject with an empty array on UNMOUNT
-      //Test:
-      //1. Refresh browser 
-      //2. F12 in browser
-      //3. Network tab set to SLOW 3G
-      //4. Click console tab
-      //5. Sign In
-      //6. Click About on Navbar.
-      //7. Click Home
-      //8. Loading... is displayed while data is being fetched as it was previously aborted on UNMOUNT
-      //Although, in the Network tab the data has still been fetched and returned 
-      //but at least the Promised was rejected.
-      
+  useEffect(() => {
+    //Initial Request For All Books In All Collections
+    initGetBooksData({
+      controller: controller,
+      all_books_read_data: all_books_read_data,
+      reading_now_data: reading_now_data,
+      setAllBooksReadData: setAllBooksReadData,
+      setReadingNowData: setReadingNowData,
+      setABRvolId: setABRvolId,
+      setRNDvolId: setRNDvolId
+    });
+    
+    return () =>{      
       controller.abort();    
     }
   }, []);
@@ -76,7 +141,10 @@ export default function User({ arb_loading, abr_setLoading, all_books_read_data,
     <div className="container">
       <h1 className="paddingToMatchCard">Welcome</h1>
       {
-        all_books_read_data.totalItems === 0 ? 
+        //##############################################
+        // BRAND NEW USER WITH NOTHING IN ANY COLLECTION
+        //##############################################
+        all_books_read_data.totalItems === 0 && reading_now_data.totalItems === 0 ? 
           // <div><p>no books</p><Link title="add books" id="addBookRead" to="/addBook">Add Book</Link></div> 
           <div className="row">
             <div className="col s12 m6">
@@ -91,14 +159,22 @@ export default function User({ arb_loading, abr_setLoading, all_books_read_data,
                 </div>
             </div>
           </div>
-        : <DisplayAbrContent 
-            all_books_read_data={all_books_read_data}
-            onCollapsibleClick={onCollapsibleClick}
-            controller={controller}
-            abr_setLoading={abr_setLoading}
-            setAllBooksReadData={setAllBooksReadData}
-            setABRvolId={setABRvolId}
-          />
+        : <>
+            <DisplayAbrContent 
+              all_books_read_data={all_books_read_data}
+              onCollapsibleClick={onCollapsibleClick}
+              controller={controller}
+              abr_setLoading={abr_setLoading}
+              setAllBooksReadData={setAllBooksReadData}
+              setABRvolId={setABRvolId}
+            />
+            <Display_Reading_Now 
+              reading_now_data={ reading_now_data }
+              onCollapsibleClick={ onCollapsibleClick }
+              setReadingNowData={setReadingNowData}
+              controller={controller}
+            />
+          </>
       }
       
     </div>    

@@ -1,23 +1,22 @@
 import {Link} from 'react-router-dom';
-import '../../css/dply_abr_content.css';
 import { postData } from '../../Data/get_set_Data';
 
-export default function DisplayAbrContent({ abr_setLoading, all_books_read_data, onCollapsibleClick, controller, setAllBooksReadData, setABRvolId }){
-    
+export default function Display_Reading_Now({ reading_now_data, setReadingNowData, onCollapsibleClick, controller }){
+
     console.log('%c render' , 'color: red');
 
     function Books(props) {
 
-        function deleteBookFn(volumeid){
+        function deleteReadingNowBookFn(volumeid){
 
-            setAllBooksReadData([]);
+            setReadingNowData([]);
             let props = {
-                msg: "deleteBook_ABR_04",
+                msg: "deleteBook_ReadingNow_03",
                 volumeid: volumeid,
                 controller: controller,
-                setAllBooksReadData: setAllBooksReadData,
-                setABRvolId: setABRvolId,
-                abr_setLoading: abr_setLoading
+                setReadingNowData: setReadingNowData,
+                // setABRvolId: setABRvolId,
+                // abr_setLoading: abr_setLoading
 
             }
             postData(props);
@@ -25,7 +24,7 @@ export default function DisplayAbrContent({ abr_setLoading, all_books_read_data,
         
         return <>
             <div className="foo">
-            <h5 className="header">{props.title} <a onClick={() => {deleteBookFn(props.id)}} title="delete" className="addBookReadDelete right" to="/deleteBook" ><i className="material-icons red-text">delete</i></a> </h5>
+            <h5 className="header">{props.title} <a onClick={() => {deleteReadingNowBookFn(props.id)}} title="delete" className="addBookReadDelete right" to="/deleteBook" ><i className="material-icons red-text">delete</i></a> </h5>
             </div>
             
             <div className="card horizontal">
@@ -49,23 +48,35 @@ export default function DisplayAbrContent({ abr_setLoading, all_books_read_data,
         </>          
     }
 
-    return (
-        //HAVE READ COLLECTION
+    return reading_now_data[0]?.totalItems === 0 ? (
+        <ul className="col s12 m12 l6">
+            <li>
+
+                <div className="collapsible-header">
+                    <i className="material-icons">book</i>
+                    {reading_now_data[0]?.totalItems} Books Reading Now
+                    <Link title="add books" id="addBookRead" to={{pathname: "/addBook", state:{collection: "Reading Now"}}}><i className="material-icons">add</i></Link>                                
+                </div>
+
+                <div className="collapsible-body">
+                    
+                </div>
+            </li>
+        </ul>
+    )
+    :(
         <ul className="collapsible col s12 m12 l6" id="collapsible" onClick={onCollapsibleClick}>
             <li>
 
                 <div className="collapsible-header">
                     <i className="material-icons">book</i>
-                    {all_books_read_data[0]?.totalItems} Books Read
-                    {/* state is passed through to AddBook.js in the useEffect hook
-                    why? so can keep track of collection type ie have read, to read, reading now etc
-                     */}
-                    <Link title="add books" id="addBookRead" to={{pathname: "/addBook", state:{collection: "Have Read"}}}><i className="material-icons">add</i></Link>                                
+                    {reading_now_data[0]?.totalItems} Books Reading Now
+                    <Link title="add books" id="addBookRead" to={{pathname: "/addBook", state:{collection: "Reading Now"}}}><i className="material-icons">add</i></Link>                                
                 </div>
 
                 <div className="collapsible-body">
                     
-                    {all_books_read_data.map(book => 
+                    {reading_now_data.map(book => 
                     <Books
                     image={book.imageLinks}
                     title={book.title}
@@ -77,9 +88,9 @@ export default function DisplayAbrContent({ abr_setLoading, all_books_read_data,
                     key={book.id} 
                     />)}
                     
-                </div>                    
+                </div>
             </li>
-        </ul> 
+        </ul>
     )
     
 }

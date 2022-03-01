@@ -32,25 +32,32 @@ function App() {
   //passed through to Navbar.
   const { startupfinished, auth, signInBtnFn, signOutBtnFn, show_signing_in_out_screen, loggedInOutMsg} = useGoogleAuthFn();
   
-  //**setAllBooksReadData** -> User/User.js -> Data/getData -> Utils/sortData **WHERE IT IS SET**
-  //set with the all books read data returned from Google Books.
   const [all_books_read_data, setAllBooksReadData] = useState([]);
-
-  //**setABRvolId** -> User/User.js -> Data/get_set_Data/getData+postData -> Utils/sortData **WHERE IT IS SET**
-  //set with the volume ID of books already in collection so used to make a check and stop books being added
-  //that are already in collection.
-  const [abr_already_in_collection_volumeid, setABRvolId] = useState([]); 
-
-  //**abr_loading, abr_setLoading ** -> User/User.js
-  //**abr_setLoading** -> User/User.js -> User/Display_ABR_Content -> Data/get_set_Data/postData
-  //**WHERE IT IS SET TRUE** when book deleted because the data for the User page is re-fetched.
+  const [reading_now_data, setReadingNowData] = useState([]);
+  const [abr_already_in_collection_volumeid, setABRvolId] = useState([]);
+  const [reading_now_data_already_in_collection_volumeid, setRNDvolId] = useState([]); 
   const [arb_loading, abr_setLoading] = useState(true);
 
   useEffect(()=>{
+    console.log(all_books_read_data)
     if(all_books_read_data.length > 0){
       abr_setLoading(false);
     }
   },[all_books_read_data]);
+
+  useEffect(()=>{
+    console.log(reading_now_data)
+
+  },[reading_now_data])
+
+  useEffect(()=>{
+    console.log(abr_already_in_collection_volumeid)
+
+  },[abr_already_in_collection_volumeid])
+  useEffect(()=>{
+    console.log(reading_now_data_already_in_collection_volumeid)
+
+  },[reading_now_data_already_in_collection_volumeid])
 
   //Passed through to User.js
   function collapsibleFn(){
@@ -83,9 +90,12 @@ function App() {
               <User 
                 all_books_read_data = { all_books_read_data }
                 setAllBooksReadData = { setAllBooksReadData }
+                reading_now_data = { reading_now_data }
+                setReadingNowData = { setReadingNowData }
                 arb_loading = { arb_loading }
                 abr_setLoading = { abr_setLoading }
                 setABRvolId = { setABRvolId }
+                setRNDvolId = { setRNDvolId }
                 onCollapsibleClick={collapsibleFn}
               /> 
             : <Redirect to="/" /> 

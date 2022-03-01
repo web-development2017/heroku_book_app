@@ -3,38 +3,102 @@ import { useLocation } from "react-router-dom";
 import { postData } from "../../Data/get_set_Data";
 import { sortData } from "../../Utils/SortData";
 
+function fetchDataFromISBN(stripped_isbn, callback, {signal}){
+    
+    // Function to do an Ajax call
+    const fetchData = async () => {
+        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${stripped_isbn}&fields=totalItems,items(id,volumeInfo(title,authors,publisher,publishedDate,imageLinks/thumbnail,industryIdentifiers/type,industryIdentifiers/identifier))`, {signal}); // Generate the Response object
+        
+        if (response.ok) {
+            const jsonValue = await response.json(); // Get JSON value from the response body
+            return Promise.resolve(jsonValue);
+        } else {
+            return Promise.reject('getBooks rejected');
+        }
+    }
+    
+    // Call the function and output value or error message to console
+    fetchData().then((value) =>{
+        callback(value)
+    }).catch((error) => {
+        console.log(error)
+    });
+        
+}
+
+function findBookToAdd(e, {signal, collection, abr_already_in_collection_volumeid, setBookAlreadyInCollection, add_abr_setLoading, setBookFoundData}){
+    e.preventDefault();
+    let isbn;        
+    isbn = '';
+    isbn = document.getElementById("ISBN").value.trim();
+    let stripped_isbn = isbn.replaceAll(' ','');
+    // #####################
+    add_abr_setLoading(true);
+    setBookAlreadyInCollection(false);
+    // #####################
+
+    // #5
+    function foo(returned_sorted_data){
+        console.log(returned_sorted_data[0].totalItems);
+        if(returned_sorted_data[0].totalItems === 1){
+            setBookFoundData(returned_sorted_data)
+        }
+    } 
+
+    // #4 Check if already in collection and if not send value to the sort data function
+    function isInCollection(value){
+        let foundBookId = value.items[0].id;
+        let book_already_in_collection_volumeid;
+        collection === "Reading Now" ? console.log("foo")
+        :
+        collection === "Have Read" ? book_already_in_collection_volumeid = abr_already_in_collection_volumeid
+        :
+        console.log("bar")
+
+        const already_in_collection_match = book_already_in_collection_volumeid.find(element => element === foundBookId);
+        if(already_in_collection_match){
+            setBookAlreadyInCollection(true);
+            add_abr_setLoading(false);
+        }else{
+            console.log(`book not in ${collection} collection`);
+            let returned_sorted_data = sortData({value: value})
+            foo(returned_sorted_data);
+        }
+        
+    }
+
+    // #3 If book found Check if already in collection
+    function xy(value){
+        if(value.totalItems > 0){
+            console.log("book found, check if in collection")
+            isInCollection(value)
+        }else{
+            console.log("no book found")
+            setBookFoundData([value]);
+            //######################### 
+            add_abr_setLoading(false);
+            //#########################
+        }  
+    }
+
+    // #2 
+    function callback(value){
+        xy(value);
+    }
+    // #1 Fetch Data
+    fetchDataFromISBN(stripped_isbn, callback, {signal: signal});      
+       
+}
+
 export default function AddBook({ abr_setLoading, abr_already_in_collection_volumeid, setAllBooksReadData, setABRvolId }){
     
     console.log('%c render' , 'color: red');
 
     const location = useLocation();
-    
-    /* ################################
-    Used in DisplayBook.js
-    STATES:
-    No message for intial state
-    Book found and IS in collection
-    Book found and NOT in collection
-    Book Not Found
-    Loading
-    ################################ */
 
-    //**add_abr_setLoading** 
-    // set FALSE IF fetchData returns a value.totalItems <= 0
-    // set FALSE IF abr_toadd_data.length > 0
     const [add_abr_loading, add_abr_setLoading] = useState(false);
-
-    //**setBookFoundData** -> Utils/sortData **WHERE IT IS SET**
-    // SET with value returned from fetchData if value.totalItems <= 0
-    // set with EMPTY ARRAY when CANCEL BTN CLICKED + ON UNMOUNT
     const [abr_toadd_data, setBookFoundData] = useState([]);
-
-    // **setBookAlreadyInCollection** set FALE HandleISBNSubmit clicked
-    // set TRUE when already in collection
-    // set FALSE when CANCEL BTN CLICKED
     const [book_already_in_collection, setBookAlreadyInCollection] = useState(false);
-
-    // **setBookAdded** -> Data/get_set_Data/postData **WHERE IT IS SET TRUE**
     const [book_added, setBookAdded] = useState(false);
 
     useEffect(()=>{
@@ -42,6 +106,7 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
     },[book_already_in_collection]);
 
     useEffect(()=>{
+        console.log(abr_toadd_data)
         if(abr_toadd_data.length > 0){
             add_abr_setLoading(false);
         }
@@ -50,82 +115,15 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
     useEffect(()=>{
         console.log(book_added);
     },[book_added]);
-
-
-    let isbn;
+    
     var controller = new AbortController();
     var signal = controller.signal;
-
-    //#region GET BOOK DETAILS
-    function HandleISBNSubmit(e){
-        e.preventDefault();
-        isbn = '';
-        isbn = document.getElementById("ISBN").value.trim();
-        let stripped_isbn = isbn.replaceAll(' ','');
-        //#########################
-        add_abr_setLoading(true);
-        //#########################
-        setBookAlreadyInCollection(false);
-        setBookAdded(false);
-
-        //CHECK IF BOOK IS ALREADY IN COLLECTION
-        function isInCollection(value){
-            // console.log(`%c ${value}`, 'color:red');
-
-            let foundBookId = value.items[0].id;
-            const already_in_collection_match = abr_already_in_collection_volumeid.find(element => element === foundBookId);
-            if(already_in_collection_match){
-                //#########################
-                add_abr_setLoading(false);
-                //#########################
-                setBookAlreadyInCollection(true);
-               
-            }else{
-                // //#########################
-                // add_abr_setLoading(true);
-                // //#########################
-                console.log("not in collection")
-                let props = {
-                    msg: "sortBookToAddToABR",
-                    value: value,
-                    setBookFoundData: setBookFoundData
-                }
-                sortData(props)
-            }
-        }
-        
-        // Function to do an Ajax call
-        const fetchData = async () => {
-        const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${stripped_isbn}&fields=totalItems,items(id,volumeInfo(title,authors,publisher,publishedDate,imageLinks/thumbnail,industryIdentifiers/type,industryIdentifiers/identifier))`, {signal}); // Generate the Response object
-            if (response.ok) {
-                const jsonValue = await response.json(); // Get JSON value from the response body
-                return Promise.resolve(jsonValue);
-            } else {
-                return Promise.reject('getBooks rejected');
-            }
-        }
-    
-        // Call the function and output value or error message to console
-        fetchData().then((value) =>{
-            if(value.totalItems > 0){
-                isInCollection(value);
-            }else{
-                console.log('google books couldn\'t find the book with that isbn');
-                setBookFoundData(value);
-                //######################### 
-                add_abr_setLoading(false);
-                //#########################
-            }   
-        }).catch((error) => {
-            console.log(error)
-        });   
-    }
-    //#endregion GET BOOK DETAILS
 
     function selectedBookToAdd(volumeid){
         // console.log("%c clicked", "color:green")
         let props = {
-            msg: "to_add_to_ABR",
+            // msg: "to_add_to_ABR",
+            msg: collection,
             volumeid: volumeid,
             setBookAdded: setBookAdded,
             controller: controller,
@@ -133,7 +131,8 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
             setABRvolId: setABRvolId,
             abr_setLoading: abr_setLoading
         }
-        postData(props);
+        console.log(props.msg)
+        // postData(props);
     }
 
     function Books(props) {
@@ -164,9 +163,16 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
         </div> 
     }
     
+    const [collection, setcollection] = useState("")
+    useEffect(()=>{
+        console.log(collection)
+    },[collection])
+
     useEffect(() =>{
         
-        console.log(location.state);
+        //name of collection passed through from Display_ABR_Content.js line 60
+        console.log(location.state.collection);
+        setcollection(location.state.collection)
 
         return () =>{            
             //ABORT FETCH
@@ -186,9 +192,9 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
     return (
         <>
         <div className="container">
-            <h1>Add Book</h1>
+            <h1>Add to {collection}</h1>
 
-            <form id="myForm" onSubmit={(e) => {HandleISBNSubmit(e)}}>
+            <form id="myForm" onSubmit={(e) => {findBookToAdd(e,{signal:signal, collection: collection, abr_already_in_collection_volumeid: abr_already_in_collection_volumeid, setBookAlreadyInCollection: setBookAlreadyInCollection, add_abr_setLoading: add_abr_setLoading, setBookFoundData: setBookFoundData})}}>
                 <label>ISBN</label>
                 <input
                     id="ISBN"
@@ -217,7 +223,7 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
             book_already_in_collection === true ?
             <div className="container"><p>Book Already In Collection</p></div>
             :
-            abr_toadd_data.length === 1 ?
+            abr_toadd_data.length === 1  && abr_toadd_data[0].totalItems === 1?
             <div className="container">            
                 <ul className="col s12 m12 l6">
                     <li className="active">
@@ -246,9 +252,12 @@ export default function AddBook({ abr_setLoading, abr_already_in_collection_volu
                 </ul>
             </div>
             :
+            abr_toadd_data[0].totalItems === 0 ?
             <div className="container">
                 <p>No Book Found</p>
             </div>
+            :
+            console.log("shouldn't get a message here")
             
         }
         
