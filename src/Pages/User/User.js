@@ -7,53 +7,21 @@ import '../../css/home.css';
 import Display_Reading_Now from "./Display_Reading_Now";
 import { sortData } from "../../Utils/SortData";
 
-function books_read({ controller, setAllBooksReadData, setABRvolId }){
-  let url = 'books/v1/mylibrary/bookshelves/4/volumes?fields=totalItems, items(id, volumeInfo/title, volumeInfo/authors, volumeInfo/publishedDate, volumeInfo/publisher, volumeInfo/industryIdentifiers, volumeInfo/imageLinks)';
+function book_collections_fn({ controller, setBookData, setBookVolId }, bookshelfId){
+  let url = `books/v1/mylibrary/bookshelves/${bookshelfId}/volumes?fields=totalItems, items(id, volumeInfo/title, volumeInfo/authors, volumeInfo/publishedDate, volumeInfo/publisher, volumeInfo/industryIdentifiers, volumeInfo/imageLinks)`;
   // #4 Store Volume Id
   function store_volumeId({returned_sorted_data}){
-    setABRvolId(returned_sorted_data.map(book =>book.id))
+    setBookVolId(returned_sorted_data.map(book =>book.id));
   }
   // #3 Store Data
   function store_sorted_data({returned_sorted_data}){
-    setAllBooksReadData(returned_sorted_data);
+    setBookData(returned_sorted_data);
   }
   // #2 Sort Data
   function sorted_data_callback(value){
     if(value.totalItems === 0){
-      console.log("no books in collection")
+      console.log("no books in collection");
     }else{
-      console.log("books in All Books Read collection")
-      let returned_sorted_data = sortData({value: value})
-      store_sorted_data({returned_sorted_data: returned_sorted_data})
-      store_volumeId({returned_sorted_data: returned_sorted_data})
-
-    }
-  }
-  // #1 Get Data
-  getData({url: url, controller: controller}, sorted_data_callback);
-  
-}
-
-function reading_now({ controller, setReadingNowData, setRNDvolId }){
-  // getData({msg: "getReadingNow", controller: controller, setReadingNowData: setReadingNowData})
-
-  let url = 'books/v1/mylibrary/bookshelves/3/volumes?fields=totalItems, items(id, volumeInfo/title, volumeInfo/authors, volumeInfo/publishedDate, volumeInfo/publisher, volumeInfo/industryIdentifiers, volumeInfo/imageLinks)';
-
-  // #4 Store Volume Id
-  function store_volumeId({returned_sorted_data}){
-    setRNDvolId(returned_sorted_data.map(book =>book.id));
-    // returned_sorted_data.map(book => console.log(book.id))
-  }
-  // #3 Store Data
-  function store_sorted_data({returned_sorted_data}){
-    setReadingNowData(returned_sorted_data);
-  }
-  // #2 Sort Data
-  function sorted_data_callback(value){
-    if(value.totalItems === 0){
-      console.log("no books in Reading Now collection")
-    }else{
-      console.log("books in Reading Now collection");
       let returned_sorted_data = sortData({value: value});
       store_sorted_data({returned_sorted_data: returned_sorted_data});
       store_volumeId({returned_sorted_data: returned_sorted_data});
@@ -61,23 +29,24 @@ function reading_now({ controller, setReadingNowData, setRNDvolId }){
   }
   // #1 Get Data
   getData({url: url, controller: controller}, sorted_data_callback);
+
 }
 
 function initGetBooksData({ controller, all_books_read_data, reading_now_data, setAllBooksReadData, setReadingNowData, setABRvolId, setRNDvolId }){
   let arrayofcollections = [all_books_read_data, reading_now_data]
+  let bookshelfId;
 
   arrayofcollections.forEach((array) => {
 
     if (array.length === 0) {
+      
       // Nothing in array so need to get the data
       arrayofcollections.indexOf(array) === 0 ?
-        // 0 is "books read" collection
-        books_read({ controller: controller, setAllBooksReadData: setAllBooksReadData, setABRvolId: setABRvolId })
-        
+        // 0 is "books read" collection        
+        book_collections_fn({ controller: controller, setBookData: setAllBooksReadData, setBookVolId: setABRvolId }, bookshelfId = 4) 
       : 
-      arrayofcollections.indexOf(array) === 1 ? 
-    
-        reading_now({ controller: controller, setReadingNowData: setReadingNowData, setRNDvolId: setRNDvolId })
+      arrayofcollections.indexOf(array) === 1 ?
+        book_collections_fn({ controller: controller, setBookData: setReadingNowData, setBookVolId: setRNDvolId }, bookshelfId = 3)
       : 
       console.log("Shouln't get a message here")
 
